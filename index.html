@@ -13,7 +13,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <style>
-    /* Estilos generales y ajustes de la barra de navegación (estilo RPG Lab) */
     body {
       font-family: 'Inter', sans-serif;
       background-color: #ffffff;
@@ -21,7 +20,6 @@
       line-height: 1.5;
     }
     
-    /* Navbar personalizada - ahora con acento verde/azul */
     .navbar {
       background-color: #f8f9fa !important;
       border-bottom: 1px solid #e7e7e7;
@@ -36,7 +34,7 @@
       transition: all 0.2s ease;
     }
     .navbar-brand:hover {
-      color: #2A9D8F !important;  /* Verde azulado */
+      color: #2A9D8F !important;
       transform: scale(1.02);
     }
     .navbar-nav .nav-link {
@@ -64,7 +62,21 @@
       outline: none;
     }
     
-    /* Nombre principal */
+    .btn-lang {
+      border: 1px solid #2A9D8F;
+      color: #2A9D8F;
+      border-radius: 30px;
+      padding: 0.3rem 0.8rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 0.2s;
+      margin-left: 0.5rem;
+    }
+    .btn-lang:hover {
+      background-color: #2A9D8F;
+      color: white;
+    }
+    
     .name-title {
       font-family: 'Oswald', sans-serif;
       font-size: 32px;
@@ -73,19 +85,6 @@
       margin-bottom: 0.5rem;
     }
     
-    /* Enlaces laterales */
-    .sidebar-links a {
-      text-decoration: none;
-      color: #2A9D8F;
-      font-weight: 500;
-      transition: 0.2s;
-    }
-    .sidebar-links a:hover {
-      color: #1e6f64;
-      text-decoration: underline;
-    }
-    
-    /* Publicaciones y listas */
     h2 {
       font-weight: 700;
       margin-top: 1.5rem;
@@ -108,9 +107,6 @@
     a:hover {
       color: #1e6f64;
       text-decoration: underline;
-    }
-    .paper a {
-      font-weight: 500;
     }
     .img-responsive {
       max-width: 100%;
@@ -152,7 +148,7 @@
 </head>
 <body>
 
-<!-- ================= BARRA DE NAVEGACIÓN (color verde/azul) ================= -->
+<!-- Barra de navegación con botón de idioma -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
   <div class="container">
     <a class="navbar-brand" href="index.html">
@@ -163,25 +159,27 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarMain">
-      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-        <li class="nav-item"><a class="nav-link active" href="index.html">Home</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Projects</a></li>
-        <li class="nav-item"><a class="nav-link" href="#publications">Publications</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">CV</a></li>
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
+        <li class="nav-item"><a class="nav-link" href="#" id="navHome">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" id="navProjects">Projects</a></li>
+        <li class="nav-item"><a class="nav-link" href="#publications" id="navPublications">Publications</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" id="navCV">CV</a></li>
+        <li class="nav-item">
+          <button class="btn btn-lang ms-2" id="langToggle">🇪🇸 Español</button>
+        </li>
       </ul>
     </div>
   </div>
 </nav>
 
-<!-- CONTENIDO PRINCIPAL (todo el material original conservado) -->
+<!-- CONTENIDO PRINCIPAL -->
 <div class="container my-4">
-  <!-- Primera fila: foto + bio y columna lateral de contacto -->
   <div class="row g-4">
     <div class="col-md-8">
       <img class="img-responsive w-100" src="photo.jpg" alt="Frank Murphy photo"><br>
       <div style="margin-top: 1.5rem; text-align: justify;">
-        <p>Welcome to my webpage! I am an Associate Professor at the Faculty of Science, UNAM, specializing in Noncommutative Algebra, Group Theory, and Order Theory. I obtained my Doctorate in Mathematics from the Instituto de Matemáticas, UNAM, under the guidance of Dr. José Ríos and Dr. Francisco Raggi.</p>
-        <p>I have directed 18 theses at both Bachelor's and Master's levels, guiding students in diverse areas such as finance, machine learning, game theory, category theory, ring theory, order theory, and algebraic topology. I am passionate about both teaching and research, striving to foster a stimulating academic environment for my students while contributing to the advancement of knowledge in my field.</p>
+        <p id="bio1">Welcome to my webpage! I am an Associate Professor at the Faculty of Science, UNAM, specializing in Noncommutative Algebra, Group Theory, and Order Theory. I obtained my Doctorate in Mathematics from the Instituto de Matemáticas, UNAM, under the guidance of Dr. José Ríos and Dr. Francisco Raggi.</p>
+        <p id="bio2">I have directed 18 theses at both Bachelor's and Master's levels, guiding students in diverse areas such as finance, machine learning, game theory, category theory, ring theory, order theory, and algebraic topology. I am passionate about both teaching and research, striving to foster a stimulating academic environment for my students while contributing to the advancement of knowledge in my field.</p>
       </div>
     </div>
 
@@ -189,12 +187,10 @@
       <div class="contact-info">
         <div class="name-title">Frank Patrick Murphy Hernandez</div>
         <p class="mt-2 mb-1"><i class="bi bi-envelope-fill me-2" style="color:#2A9D8F;"></i> <b>murphy@ciencias.unam.mx</b></p>
-        <p class="mb-0"><i class="bi bi-geo-alt-fill me-2" style="color:#2A9D8F;"></i> Science Faculty, UNAM<br>
-        Investigación Científica<br>
-        Mexico City, Mexico</p>
+        <p class="mb-0" id="contactAddress"><i class="bi bi-geo-alt-fill me-2" style="color:#2A9D8F;"></i> Science Faculty, UNAM<br>Investigación Científica<br>Mexico City, Mexico</p>
       </div>
       <div class="social-links">
-        <h6 class="fw-bold mb-2"><i class="bi bi-link-45deg"></i> Profiles</h6>
+        <h6 class="fw-bold mb-2" id="profilesTitle"><i class="bi bi-link-45deg"></i> Profiles</h6>
         <dd><a href="https://scholar.google.com/citations?user=0LKY0zEAAAAJ&hl=es" target="_blank"><i class="bi bi-google"></i> Google Scholar</a></dd>
         <dd><a href="#"><i class="bi bi-twitter-x"></i> Twitter</a></dd>
         <dd><a href="https://www.linkedin.com/in/fmurphymx/" target="_blank"><i class="bi bi-linkedin"></i> LinkedIn</a></dd>
@@ -202,27 +198,23 @@
     </div>
   </div>
 
-  <!-- Segunda fila: todas las publicaciones y listados académicos -->
   <div class="row mt-4">
     <div class="col-md-8">
-      <h2 id="publications">Publications</h2>
-      <strong>Peer-reviewed</strong><br/>
-      <ul>
-        <li class="paper"><a href="https://link.springer.com/article/10.1007/s00012-020-00669-3" target="_blank">The category of G-posets</a> Frank Murphy-Hernandez</li>
-      </ul>
+      <!-- Todos los encabezados y textos de sección tienen ID para traducción -->
+      <h2 id="publicationsTitle">Publications</h2>
+      <strong id="peerReviewedLabel">Peer-reviewed</strong><br/>
+      <ul><li class="paper"><a href="https://link.springer.com/article/10.1007/s00012-020-00669-3" target="_blank">The category of G-posets</a> Frank Murphy-Hernandez</li></ul>
 
-      <strong>Under revision</strong><br/>
-      <ul>
-        <li class="paper"><a href="#" target="_blank">The Dedekind MacNeille Completion as a Functor</a> Frank Murphy-Hernandez</li>
-      </ul>
+      <strong id="underRevisionLabel">Under revision</strong><br/>
+      <ul><li class="paper"><a href="#" target="_blank">The Dedekind MacNeille Completion as a Functor</a> Frank Murphy-Hernandez</li></ul>
 
-      <strong>In Progress</strong><br/>
+      <strong id="inProgressLabel">In Progress</strong><br/>
       <ul>
         <li class="paper"><a href="https://github.com/fmurphymx/fmurphymx.github.io/raw/main/Articulos/Monoidal Geometry.pdf" target="_blank">Monoidal Vector Bundles</a> Frank Murphy-Hernandez and Eduardo Leon</li>
         <li class="paper"><a href="https://github.com/fmurphymx/fmurphymx.github.io/raw/main/Articulos/Comonad Cohomology.pdf" target="_blank">Comonadic Cohomology in G-set as an Extension of Group Cohomology</a> Frank Murphy-Hernandez and Fabio Calo</li>
       </ul>
 
-      <strong>Notes from Courses</strong><br/>
+      <strong id="notesLabel">Notes from Courses</strong><br/>
       <ul>
         <li class="paper"><a href="https://github.com/fmurphymx/fmurphymx.github.io/raw/main/Libros/AS1.pdf">Notas de Algebra Superior 1</a>. Notas de Algebra Superior 1</li>
         <li class="paper"><a href="https://github.com/fmurphymx/fmurphymx.github.io/raw/main/Libros/AS2.pdf">Notas de Algebra Superior 2</a>. Actualización de las notas de Algebra Superior 2 para el curso del semestre 2024-2</li>
@@ -236,7 +228,7 @@
         <li class="paper"><a href="https://github.com/fmurphymx/fmurphymx.github.io/raw/main/Libros/CS.pdf">Notas de Conjuntos Simpliciales</a>. Notas de Conjuntos Simpliciales</li>
       </ul>
 
-      <strong>Directed Theses</strong><br/>
+      <strong id="thesesLabel">Directed Theses</strong><br/>
       <ol class="paper-list" style="padding-left: 1.2rem;">
         <li><a href="https://github.com/fmurphymx/fmurphymx.github.io/raw/main/Tesis/sergio.pdf">Algunos espacios anillados con la propiedad de Krull-Schmidt</a> Fabio Giuseppe Calo Dizy (2026)</li>
         <li><a href="https://github.com/fmurphymx/fmurphymx.github.io/raw/main/Tesis/sergio.pdf">Sobre la existencia y caracterización de las cubiertas planas e inyectivas en la categoría de módulos</a> Sergio Rosado Zuñiga (2026)</li>
@@ -258,12 +250,12 @@
         <li><a href="https://github.com/fmurphymx/fmurphymx.github.io/raw/main/Tesis/chida.pdf">Una introducción al comercio de alta frecuencia (HFT): propiedades y pronósticos del libro de órdenes</a> Carlos Octavio Chida Suarez (2013)</li>
       </ol>
 
-      <strong>Translations</strong><br/>
+      <strong id="translationsLabel">Translations</strong><br/>
       <ul>
         <li><a href="https://github.com/fmurphymx/fmurphymx.github.io/raw/main/Traducciones/Grassman.pdf" target="_blank">Hermann Grassmann and the creation of linear algebra - Desmond Fearnley-Sander</a> Spanish Translation</li>
       </ul>
 
-      <strong>R Pubs</strong><br/>
+      <strong id="rpubsLabel">R Pubs</strong><br/>
       <ol>
         <li><a href="https://rpubs.com/FMurphyHernandez/DVS1" target="_blank">Descomposición en Valores Singulares</a></li>
         <li><a href="https://rpubs.com/FMurphyHernandez/DVS2" target="_blank">Descomposición en Valores Singulares en R</a></li>
@@ -279,7 +271,6 @@
   </div>
 </div>
 
-<!-- Mapa de visitas y footer -->
 <div class="container text-center my-4">
   <div class="row">
     <div class="col-12">
@@ -292,12 +283,91 @@
 
 <footer>
   <div class="container">
-    <p class="mb-0">© 2026 Frank Patrick Murphy Hernandez | Inspirado en <a href="https://rpglab.github.io/" target="_blank" class="text-decoration-none">RPG Lab</a></p>
+    <p class="mb-0" id="footerCredit">© 2026 Frank Patrick Murphy Hernandez | Inspirado en <a href="https://rpglab.github.io/" target="_blank" class="text-decoration-none">RPG Lab</a></p>
     <small><a href="https://github.com/mavroudisv/plain-academic" target="_blank" style="color:#b5bec9;">Plain Academic</a> theme adapted</small>
   </div>
 </footer>
 
-<!-- Bootstrap 5 JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  // Diccionario de traducciones
+  const translations = {
+    en: {
+      navHome: "Home",
+      navProjects: "Projects",
+      navPublications: "Publications",
+      navCV: "CV",
+      bio1: "Welcome to my webpage! I am an Associate Professor at the Faculty of Science, UNAM, specializing in Noncommutative Algebra, Group Theory, and Order Theory. I obtained my Doctorate in Mathematics from the Instituto de Matemáticas, UNAM, under the guidance of Dr. José Ríos and Dr. Francisco Raggi.",
+      bio2: "I have directed 18 theses at both Bachelor's and Master's levels, guiding students in diverse areas such as finance, machine learning, game theory, category theory, ring theory, order theory, and algebraic topology. I am passionate about both teaching and research, striving to foster a stimulating academic environment for my students while contributing to the advancement of knowledge in my field.",
+      contactAddress: "Science Faculty, UNAM<br>Investigación Científica<br>Mexico City, Mexico",
+      profilesTitle: "Profiles",
+      publicationsTitle: "Publications",
+      peerReviewedLabel: "Peer-reviewed",
+      underRevisionLabel: "Under revision",
+      inProgressLabel: "In Progress",
+      notesLabel: "Notes from Courses",
+      thesesLabel: "Directed Theses",
+      translationsLabel: "Translations",
+      rpubsLabel: "R Pubs",
+      footerCredit: "© 2026 Frank Patrick Murphy Hernandez | Inspired by <a href='https://rpglab.github.io/' target='_blank' class='text-decoration-none'>RPG Lab</a>",
+      langButton: "🇪🇸 Español"
+    },
+    es: {
+      navHome: "Inicio",
+      navProjects: "Proyectos",
+      navPublications: "Publicaciones",
+      navCV: "CV",
+      bio1: "¡Bienvenido a mi página web! Soy Profesor Asociado en la Facultad de Ciencias, UNAM, especializado en Álgebra No Conmutativa, Teoría de Grupos y Teoría del Orden. Obtuve mi Doctorado en Matemáticas en el Instituto de Matemáticas, UNAM, bajo la dirección de los doctores José Ríos y Francisco Raggi.",
+      bio2: "He dirigido 18 tesis de licenciatura y maestría, guiando a estudiantes en diversas áreas como finanzas, aprendizaje automático, teoría de juegos, teoría de categorías, teoría de anillos, teoría del orden y topología algebraica. Me apasiona tanto la docencia como la investigación, esforzándome por fomentar un ambiente académico estimulante para mis estudiantes mientras contribuyo al avance del conocimiento en mi campo.",
+      contactAddress: "Facultad de Ciencias, UNAM<br>Investigación Científica<br>Ciudad de México, México",
+      profilesTitle: "Perfiles",
+      publicationsTitle: "Publicaciones",
+      peerReviewedLabel: "Arbitradas",
+      underRevisionLabel: "En revisión",
+      inProgressLabel: "En progreso",
+      notesLabel: "Notas de cursos",
+      thesesLabel: "Tesis dirigidas",
+      translationsLabel: "Traducciones",
+      rpubsLabel: "R Pubs",
+      footerCredit: "© 2026 Frank Patrick Murphy Hernandez | Inspirado en <a href='https://rpglab.github.io/' target='_blank' class='text-decoration-none'>RPG Lab</a>",
+      langButton: "🇬🇧 English"
+    }
+  };
+
+  let currentLang = 'en';
+
+  function setLanguage(lang) {
+    const t = translations[lang];
+    if (!t) return;
+    document.getElementById('navHome').innerText = t.navHome;
+    document.getElementById('navProjects').innerText = t.navProjects;
+    document.getElementById('navPublications').innerText = t.navPublications;
+    document.getElementById('navCV').innerText = t.navCV;
+    document.getElementById('bio1').innerHTML = t.bio1;
+    document.getElementById('bio2').innerHTML = t.bio2;
+    document.getElementById('contactAddress').innerHTML = t.contactAddress;
+    document.getElementById('profilesTitle').innerHTML = `<i class="bi bi-link-45deg"></i> ${t.profilesTitle}`;
+    document.getElementById('publicationsTitle').innerText = t.publicationsTitle;
+    document.getElementById('peerReviewedLabel').innerText = t.peerReviewedLabel;
+    document.getElementById('underRevisionLabel').innerText = t.underRevisionLabel;
+    document.getElementById('inProgressLabel').innerText = t.inProgressLabel;
+    document.getElementById('notesLabel').innerText = t.notesLabel;
+    document.getElementById('thesesLabel').innerText = t.thesesLabel;
+    document.getElementById('translationsLabel').innerText = t.translationsLabel;
+    document.getElementById('rpubsLabel').innerText = t.rpubsLabel;
+    document.getElementById('footerCredit').innerHTML = t.footerCredit;
+    document.getElementById('langToggle').innerHTML = t.langButton;
+    currentLang = lang;
+  }
+
+  document.getElementById('langToggle').addEventListener('click', () => {
+    if (currentLang === 'en') {
+      setLanguage('es');
+    } else {
+      setLanguage('en');
+    }
+  });
+</script>
 </body>
 </html>
