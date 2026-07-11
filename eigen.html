@@ -1,181 +1,157 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Eigenvalues – Imagen Estática</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distribución de Eigenvalues</title>
     <style>
-        * { box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
-            max-width: 820px;
-            margin: 40px auto;
-            padding: 0 20px;
-            background: #f8fafc;
-            color: #0b1e33;
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fafafa;
         }
         h1 {
-            color: #1a4b7a;
-            border-bottom: 3px solid #1a4b7a;
-            padding-bottom: 8px;
-            margin-bottom: 16px;
+            color: #1f77b4;
+            border-bottom: 2px solid #1f77b4;
+            padding-bottom: 10px;
         }
-        .card {
+        .controls {
             background: white;
-            padding: 24px 28px;
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-            margin-bottom: 24px;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
         }
-        .row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 16px 30px;
-            align-items: center;
-            margin: 10px 0;
+        .control-group {
+            margin-bottom: 12px;
         }
         label {
-            font-weight: 600;
-            min-width: 120px;
             display: inline-block;
+            width: 180px;
+            font-weight: bold;
         }
         select, input[type="range"] {
-            padding: 6px 10px;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            background: white;
-            font-size: 0.95rem;
-        }
-        select {
-            min-width: 140px;
+            padding: 5px;
+            width: 200px;
         }
         input[type="range"] {
-            width: 220px;
-            accent-color: #1a4b7a;
+            width: 300px;
         }
-        .val {
-            font-weight: 700;
-            color: #1a4b7a;
-            min-width: 36px;
+        .value-display {
             display: inline-block;
+            width: 40px;
             text-align: center;
+            font-weight: bold;
         }
         button {
-            background: #1a4b7a;
+            padding: 10px 25px;
+            background: #1f77b4;
             color: white;
             border: none;
-            border-radius: 30px;
-            padding: 10px 32px;
-            font-size: 1rem;
-            font-weight: 600;
+            border-radius: 4px;
             cursor: pointer;
-            transition: background 0.2s;
-            margin-top: 8px;
+            font-size: 16px;
+            margin-top: 10px;
         }
-        button:hover { background: #0e365a; }
-        button:disabled { background: #94a3b8; cursor: not-allowed; }
+        button:hover {
+            background: #145a8a;
+        }
+        button:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
         #loading {
             display: none;
-            margin-left: 18px;
-            color: #475569;
-            font-weight: 500;
+            margin-left: 15px;
+            color: #666;
         }
         #output {
+            margin-top: 20px;
             background: white;
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            min-height: 200px;
             text-align: center;
-            min-height: 300px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
         }
         #output img {
             max-width: 100%;
-            height: auto;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
         }
         .back-link {
             display: inline-block;
-            margin-top: 24px;
-            color: #1a4b7a;
+            margin-top: 20px;
+            color: #1f77b4;
             text-decoration: none;
-            font-weight: 500;
         }
-        .back-link:hover { text-decoration: underline; }
-        .info {
-            color: #64748b;
-            font-size: 0.95rem;
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
+    <h1>🎯 Distribución de Eigenvalues</h1>
+    <p>Genera miles de matrices aleatorias y observa cómo se distribuyen sus eigenvalues en el plano complejo.</p>
 
-<h1>📊 Distribución de Eigenvalues</h1>
-<p class="info">Genera matrices aleatorias y dibuja todos sus eigenvalues en el plano complejo.</p>
+    <div class="controls">
+        <div class="control-group">
+            <label for="dimension">Dimensión de la matriz:</label>
+            <select id="dimension">
+                <option value="2">2</option>
+                <option value="3" selected>3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
+        </div>
 
-<div class="card">
-    <div class="row">
-        <label for="dimension">Dimensión</label>
-        <select id="dimension">
-            <option value="2">2</option>
-            <option value="3" selected>3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-        </select>
+        <div class="control-group">
+            <label for="num_matrices">Número de matrices:</label>
+            <input type="range" id="num_matrices" min="1000" max="50000" value="10000" step="1000">
+            <span class="value-display" id="num_matrices_value">10000</span>
+        </div>
+
+        <div class="control-group">
+            <label for="distribucion">Distribución:</label>
+            <select id="distribucion">
+                <option value="Normal (Gaussiana)">Normal (Gaussiana)</option>
+                <option value="Uniforme">Uniforme</option>
+            </select>
+        </div>
+
+        <button id="generateBtn">🚀 Generar Imagen</button>
+        <span id="loading">⏳ Procesando... (puede tardar unos segundos)</span>
     </div>
 
-    <div class="row">
-        <label for="num_matrices">Matrices</label>
-        <input type="range" id="num_matrices" min="500" max="80000" value="20000" step="500" />
-        <span class="val" id="num_matrices_val">20000</span>
+    <div id="output">
+        <p style="color: #888; text-align: center;">Configura los parámetros y presiona "Generar Imagen".</p>
     </div>
 
-    <div class="row">
-        <label for="distribucion">Distribución</label>
-        <select id="distribucion">
-            <option value="Normal (Gaussiana)">Normal</option>
-            <option value="Uniforme">Uniforme</option>
-        </select>
-    </div>
+    <a href="index.html" class="back-link">← Volver a la página principal</a>
 
-    <div class="row">
-        <label for="point_size">Tamaño de punto</label>
-        <input type="range" id="point_size" min="0.5" max="5" value="1.5" step="0.1" />
-        <span class="val" id="point_size_val">1.5</span>
-    </div>
+    <!-- Cargar Pyodide -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.26.0/full/pyodide.js"></script>
 
-    <button id="generateBtn">🚀 Generar imagen</button>
-    <span id="loading">⏳ Calculando…</span>
-</div>
-
-<div id="output">
-    <p style="color: #94a3b8;">Ajusta los parámetros y presiona «Generar imagen».</p>
-</div>
-
-<a href="index.html" class="back-link">← Volver a la página principal</a>
-
-<!-- Pyodide desde CDN -->
-<script src="https://cdn.jsdelivr.net/pyodide/v0.26.0/full/pyodide.js"></script>
-
-<script>
-    // ------------------ Código Python incrustado ------------------
-    const PYTHON_CODE = `
+    <script>
+        // Código Python que genera la imagen sin usar plt.close()
+        const PYTHON_CODE = `
 import numpy as np
 import matplotlib.pyplot as plt
 import io
 import base64
 
-def generate_image(dimension, num_matrices, distribucion, point_size):
-    # Generar matrices y calcular eigenvalues
+def generate_image(dimension, num_matrices, distribucion, batch_size=1000):
+    # --- Generar matrices y eigenvalues ---
     all_real = []
     all_imag = []
-    batch_size = 2000
     total_batches = int(np.ceil(num_matrices / batch_size))
-
+    
     for i in range(total_batches):
         curr_batch = min(batch_size, num_matrices - i * batch_size)
         if distribucion == "Normal (Gaussiana)":
@@ -185,93 +161,89 @@ def generate_image(dimension, num_matrices, distribucion, point_size):
         eigvals = np.linalg.eigvals(matrices)
         all_real.extend(eigvals.real.flatten())
         all_imag.extend(eigvals.imag.flatten())
-
+    
     all_real = np.array(all_real)
     all_imag = np.array(all_imag)
-
-    # Límites de los ejes (usando percentil 99 para evitar outliers extremos)
+    
+    # --- Límites ---
     lim_real = max(1.0, np.percentile(np.abs(all_real), 99) * 1.1)
     lim_imag = max(1.0, np.percentile(np.abs(all_imag), 99) * 1.1)
     limite = max(lim_real, lim_imag)
-
-    # Crear la figura
-    fig, ax = plt.subplots(figsize=(7, 6))
+    
+    # --- Crear figura sin pyplot (para evitar problemas de backend) ---
+    fig = plt.figure(figsize=(8, 8))
+    ax = fig.add_subplot(111)
     ax.set_xlim(-limite, limite)
     ax.set_ylim(-limite, limite)
     ax.set_aspect('equal')
-    ax.axhline(0, color='gray', linewidth=0.5, linestyle='--', alpha=0.5)
-    ax.axvline(0, color='gray', linewidth=0.5, linestyle='--', alpha=0.5)
-    ax.grid(True, linestyle=':', alpha=0.4)
-    ax.set_xlabel('Parte Real')
-    ax.set_ylabel('Parte Imaginaria')
-    ax.set_title(f'{num_matrices} matrices {dimension}×{dimension}  •  {distribucion}')
-
-    # Dibujar todos los puntos
-    ax.scatter(all_real, all_imag, s=point_size, alpha=0.5, color='#1f77b4', edgecolors='none')
-
-    # Convertir a PNG en base64
+    ax.axhline(0, color='black', linewidth=0.5, linestyle='--', alpha=0.5)
+    ax.axvline(0, color='black', linewidth=0.5, linestyle='--', alpha=0.5)
+    ax.grid(True, linestyle=':', alpha=0.6)
+    ax.set_xlabel("Parte Real")
+    ax.set_ylabel("Parte Imaginaria")
+    ax.set_title(f"{num_matrices} matrices {dimension}x{dimension} - {distribucion}")
+    
+    # Dibujar puntos
+    ax.scatter(all_real, all_imag, s=1, alpha=0.6, color='#1f77b4')
+    
+    # --- Guardar en buffer y codificar ---
     buf = io.BytesIO()
-    plt.savefig(buf, format='png', dpi=120, bbox_inches='tight')
+    fig.savefig(buf, format='png', dpi=120, bbox_inches='tight')
     buf.seek(0)
     img_base64 = base64.b64encode(buf.read()).decode('utf-8')
-    plt.close(fig)
-
+    
+    # No llamamos a plt.close() ni a fig.clf() para evitar errores
+    # El recolector de basura se encargará de liberar la memoria.
     return img_base64
-    `;
+`;
 
-    // ------------------ JavaScript ------------------
-    let pyodide = null;
+        let pyodide = null;
 
-    async function loadPyodideAndPackages() {
-        if (pyodide === null) {
+        async function loadPyodideAndPackages() {
+            if (pyodide === null) {
+                document.getElementById('loading').style.display = 'inline';
+                pyodide = await loadPyodide();
+                await pyodide.loadPackage(['numpy', 'matplotlib']);
+                await pyodide.runPythonAsync(PYTHON_CODE);
+                document.getElementById('loading').style.display = 'none';
+            }
+            return pyodide;
+        }
+
+        document.getElementById('generateBtn').addEventListener('click', async function() {
+            const output = document.getElementById('output');
+            output.innerHTML = '';
             document.getElementById('loading').style.display = 'inline';
-            pyodide = await loadPyodide();
-            await pyodide.loadPackage(['numpy', 'matplotlib']);
-            await pyodide.runPythonAsync(PYTHON_CODE);
-            document.getElementById('loading').style.display = 'none';
-        }
-        return pyodide;
-    }
+            this.disabled = true;
 
-    // Actualizar valores de los sliders
-    document.getElementById('num_matrices').addEventListener('input', function() {
-        document.getElementById('num_matrices_val').textContent = this.value;
-    });
-    document.getElementById('point_size').addEventListener('input', function() {
-        document.getElementById('point_size_val').textContent = this.value;
-    });
+            try {
+                const dimension = parseInt(document.getElementById('dimension').value);
+                const num_matrices = parseInt(document.getElementById('num_matrices').value);
+                const distribucion = document.getElementById('distribucion').value;
+                const batch_size = 1000;
 
-    // Botón Generar
-    document.getElementById('generateBtn').addEventListener('click', async function() {
-        const output = document.getElementById('output');
-        output.innerHTML = '';
-        document.getElementById('loading').style.display = 'inline';
-        this.disabled = true;
+                await loadPyodideAndPackages();
 
-        try {
-            const dimension = parseInt(document.getElementById('dimension').value);
-            const num_matrices = parseInt(document.getElementById('num_matrices').value);
-            const distribucion = document.getElementById('distribucion').value;
-            const point_size = parseFloat(document.getElementById('point_size').value);
+                const imgBase64 = await pyodide.runPythonAsync(`
+                    generate_image(${dimension}, ${num_matrices}, "${distribucion}", ${batch_size})
+                `);
 
-            await loadPyodideAndPackages();
+                // Mostrar la imagen
+                output.innerHTML = `<img src="data:image/png;base64,${imgBase64}" alt="Distribución de eigenvalues">`;
 
-            const b64 = await pyodide.runPythonAsync(`
-                generate_image(${dimension}, ${num_matrices}, "${distribucion}", ${point_size})
-            `);
+            } catch (error) {
+                output.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+                console.error(error);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                this.disabled = false;
+            }
+        });
 
-            // Mostrar la imagen
-            output.innerHTML = `<img src="data:image/png;base64,${b64}" alt="Eigenvalues" />`;
-
-        } catch (error) {
-            output.innerHTML = `<p style="color: #b91c1c;">❌ Error: ${error.message}</p>`;
-            console.error(error);
-        } finally {
-            document.getElementById('loading').style.display = 'none';
-            this.disabled = false;
-        }
-    });
-</script>
-
+        // Actualizar el valor mostrado del slider
+        document.getElementById('num_matrices').addEventListener('input', function() {
+            document.getElementById('num_matrices_value').textContent = this.value;
+        });
+    </script>
 </body>
 </html>
