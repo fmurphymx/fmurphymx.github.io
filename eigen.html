@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Eigenvalues</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fafafa;
+        }
+        h1 {
+            color: #1f77b4;
+            border-bottom: 2px solid #1f77b4;
+            padding-bottom: 10px;
+        }
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .control-group {
+            margin-bottom: 12px;
+        }
+        label {
+            display: inline-block;
+            width: 180px;
+            font-weight: bold;
+        }
+        select, input[type="range"] {
+            padding: 5px;
+            width: 200px;
+        }
+        input[type="range"] {
+            width: 300px;
+        }
+        .value-display {
+            display: inline-block;
+            width: 40px;
+            text-align: center;
+            font-weight: bold;
+        }
+        button {
+            padding: 10px 25px;
+            background: #1f77b4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #145a8a;
+        }
+        button:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
+        #loading {
+            display: none;
+            margin-left: 15px;
+            color: #666;
+        }
+        #output {
+            margin-top: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            min-height: 200px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #1f77b4;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎥 Distribución de Eigenvalues</h1>
+    <p>Genera miles de matrices aleatorias y observa cómo se distribuyen sus eigenvalues en el plano complejo.</p>
+
+    <div class="controls">
+        <div class="control-group">
+            <label for="dimension">Dimensión de la matriz:</label>
+            <select id="dimension">
+                <option value="2">2</option>
+                <option value="3" selected>3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label for="num_matrices">Número de matrices:</label>
+            <input type="range" id="num_matrices" min="1000" max="50000" value="10000" step="1000">
+            <span class="value-display" id="num_matrices_value">10000</span>
+        </div>
+
+        <div class="control-group">
+            <label for="distribucion">Distribución:</label>
+            <select id="distribucion">
+                <option value="Normal (Gaussiana)">Normal (Gaussiana)</option>
+                <option value="Uniforme">Uniforme</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label for="fps">FPS del video:</label>
+            <input type="range" id="fps" min="10" max="60" value="30" step="5">
+            <span class="value-display" id="fps_value">30</span>
+        </div>
+
+        <button id="generateBtn">🚀 Generar Video</button>
+        <span id="loading">⏳ Procesando... (puede tardar unos segundos)</span>
+    </div>
+
+    <div id="output">
+        <p style="color: #888; text-align: center;">Configura los parámetros y presiona "Generar Video".</p>
+    </div>
+
+    <a href="index.html" class="back-link">← Volver a la página principal</a>
+
+    <!-- Cargar Pyodide desde CDN -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.26.0/full/pyodide.js"></script>
+
+    <script>
+        let pyodide = null;
+
+        // Función para cargar Pyodide y las librerías necesarias
+        async function loadPyodideAndPackages() {
+            if (pyodide === null) {
+                document.getElementById('loading').style.display = 'inline';
+                pyodide = await loadPyodide();
+                await pyodide.loadPackage(['numpy', 'matplotlib']);
+                // Cargar el script de Python desde el archivo
+                const response = await fetch('script.py');
+                const code = await response.text();
+                await pyodide.runPythonAsync(code);
+                document.getElementById('loading').style.display = 'none';
+            }
+            return pyodide;
+        }
+
+        // Evento del botón "Generar Video"
+        document.getElementById('generateBtn').addEventListener('click', async function() {
+            const output = document.getElementById('output');
+            output.innerHTML = '';
+            document.getElementById('loading').style.display = 'inline';
+            this.disabled = true;
+
+            try {
+                // Leer valores de los controles
+                const dimension = parseInt(document.getElementById('dimension').value);
+                const num_matrices = parseInt(document.getElementById('num_matrices').value);
+                const distribucion = document.getElementById('distribucion').value;
+                const fps = parseInt(document.getElementById('fps').value);
+                const batch_size = 1000;  // fijo para simplificar
+
+                // Cargar Pyodide (si no está cargado)
+                await loadPyodideAndPackages();
+
+                // Ejecutar la función Python y obtener el HTML del video
+                const result = await pyodide.runPythonAsync(`
+                    from script import generate_video
+                    generate_video(${dimension}, ${num_matrices}, "${distribucion}", ${fps}, ${batch_size})
+                `);
+
+                // Insertar el video en el div de salida
+                output.innerHTML = result;
+
+            } catch (error) {
+                output.innerHTML = `<p style="color: red;">❌ Error: ${error.message}</p>`;
+                console.error(error);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                this.disabled = false;
+            }
+        });
+
+        // Actualizar los valores mostrados en los sliders
+        document.getElementById('num_matrices').addEventListener('input', function() {
+            document.getElementById('num_matrices_value').textContent = this.value;
+        });
+        document.getElementById('fps').addEventListener('input', function() {
+            document.getElementById('fps_value').textContent = this.value;
+        });
+    </script>
+</body>
+</html>
