@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             padding: 20px;
             background: #fafafa;
@@ -26,22 +26,34 @@
         }
         .control-group {
             margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
         }
         label {
             display: inline-block;
             width: 180px;
             font-weight: bold;
         }
-        select, input[type="range"] {
+        select, input[type="number"], input[type="range"] {
             padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        select {
             width: 200px;
+        }
+        input[type="number"] {
+            width: 100px;
         }
         input[type="range"] {
             width: 300px;
+            margin-right: 10px;
         }
         .value-display {
             display: inline-block;
-            width: 40px;
+            min-width: 50px;
             text-align: center;
             font-weight: bold;
         }
@@ -94,11 +106,17 @@
             color: red;
             font-weight: bold;
         }
+        .info {
+            font-size: 14px;
+            color: #555;
+            margin-top: 5px;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
     <h1>🎯 Distribución de Eigenvalues</h1>
-    <p>Genera miles de matrices aleatorias y observa cómo se distribuyen sus eigenvalues en el plano complejo.</p>
+    <p>Genera matrices aleatorias y observa cómo se distribuyen sus eigenvalues en el plano complejo.</p>
 
     <div class="controls">
         <div class="control-group">
@@ -113,15 +131,20 @@
 
         <div class="control-group">
             <label for="num_matrices">Número de matrices:</label>
-            <input type="range" id="num_matrices" min="1000" max="50000" value="10000" step="1000">
+            <input type="range" id="num_matrices" min="1" max="50000" value="10000" step="1">
             <span class="value-display" id="num_matrices_value">10000</span>
+            <span style="font-size:12px; color:#666; margin-left:5px;">(mínimo 1)</span>
         </div>
 
         <div class="control-group">
-            <label for="distribucion">Distribución:</label>
+            <label for="distribucion">Distribución de los elementos:</label>
             <select id="distribucion">
                 <option value="Normal (Gaussiana)">Normal (Gaussiana)</option>
-                <option value="Uniforme">Uniforme</option>
+                <option value="Uniforme">Uniforme [-1,1]</option>
+                <option value="Bernoulli">Bernoulli {0,1}</option>
+                <option value="Exponencial">Exponencial (λ=1)</option>
+                <option value="Laplace">Laplace (μ=0, b=1)</option>
+                <option value="Cauchy">Cauchy (estándar)</option>
             </select>
         </div>
 
@@ -139,7 +162,6 @@
     <script src="https://cdn.jsdelivr.net/pyodide/v0.26.0/full/pyodide.js"></script>
 
     <script>
-        // Código Python que genera la imagen sin usar plt.close()
         const PYTHON_CODE = `
 import numpy as np
 import matplotlib.pyplot as plt
@@ -147,17 +169,31 @@ import io
 import base64
 
 def generate_image(dimension, num_matrices, distribucion, batch_size=1000):
-    # --- Generar matrices y eigenvalues ---
     all_real = []
     all_imag = []
     total_batches = int(np.ceil(num_matrices / batch_size))
     
     for i in range(total_batches):
         curr_batch = min(batch_size, num_matrices - i * batch_size)
+        
+        # Generar elementos según la distribución elegida
         if distribucion == "Normal (Gaussiana)":
             matrices = np.random.randn(curr_batch, dimension, dimension)
-        else:
+        elif distribucion == "Uniforme":
             matrices = np.random.uniform(-1, 1, (curr_batch, dimension, dimension))
+        elif distribucion == "Bernoulli":
+            matrices = np.random.choice([0, 1], size=(curr_batch, dimension, dimension))
+        elif distribucion == "Exponencial":
+            matrices = np.random.exponential(scale=1.0, size=(curr_batch, dimension, dimension))
+        elif distribucion == "Laplace":
+            # Laplace con media 0 y escala 1
+            u = np.random.uniform(-0.5, 0.5, (curr_batch, dimension, dimension))
+            matrices = np.random.laplace(loc=0.0, scale=1.0, size=(curr_batch, dimension, dimension))
+        elif distribucion == "Cauchy":
+            matrices = np.random.standard_cauchy(size=(curr_batch, dimension, dimension))
+        else:
+            matrices = np.random.randn(curr_batch, dimension, dimension)
+        
         eigvals = np.linalg.eigvals(matrices)
         all_real.extend(eigvals.real.flatten())
         all_imag.extend(eigvals.imag.flatten())
@@ -165,12 +201,15 @@ def generate_image(dimension, num_matrices, distribucion, batch_size=1000):
     all_real = np.array(all_real)
     all_imag = np.array(all_imag)
     
-    # --- Límites ---
-    lim_real = max(1.0, np.percentile(np.abs(all_real), 99) * 1.1)
-    lim_imag = max(1.0, np.percentile(np.abs(all_imag), 99) * 1.1)
-    limite = max(lim_real, lim_imag)
+    # Límites dinámicos (percentil 99 para evitar outliers extremos)
+    if len(all_real) > 0:
+        lim_real = max(1.0, np.percentile(np.abs(all_real), 99) * 1.1)
+        lim_imag = max(1.0, np.percentile(np.abs(all_imag), 99) * 1.1)
+        limite = max(lim_real, lim_imag)
+    else:
+        limite = 5.0  # fallback
     
-    # --- Crear figura sin pyplot (para evitar problemas de backend) ---
+    # --- Crear figura ---
     fig = plt.figure(figsize=(8, 8))
     ax = fig.add_subplot(111)
     ax.set_xlim(-limite, limite)
@@ -183,17 +222,14 @@ def generate_image(dimension, num_matrices, distribucion, batch_size=1000):
     ax.set_ylabel("Parte Imaginaria")
     ax.set_title(f"{num_matrices} matrices {dimension}x{dimension} - {distribucion}")
     
-    # Dibujar puntos
     ax.scatter(all_real, all_imag, s=1, alpha=0.6, color='#1f77b4')
     
-    # --- Guardar en buffer y codificar ---
+    # Guardar en buffer y codificar
     buf = io.BytesIO()
     fig.savefig(buf, format='png', dpi=120, bbox_inches='tight')
     buf.seek(0)
     img_base64 = base64.b64encode(buf.read()).decode('utf-8')
     
-    # No llamamos a plt.close() ni a fig.clf() para evitar errores
-    # El recolector de basura se encargará de liberar la memoria.
     return img_base64
 `;
 
@@ -228,7 +264,6 @@ def generate_image(dimension, num_matrices, distribucion, batch_size=1000):
                     generate_image(${dimension}, ${num_matrices}, "${distribucion}", ${batch_size})
                 `);
 
-                // Mostrar la imagen
                 output.innerHTML = `<img src="data:image/png;base64,${imgBase64}" alt="Distribución de eigenvalues">`;
 
             } catch (error) {
@@ -240,7 +275,7 @@ def generate_image(dimension, num_matrices, distribucion, batch_size=1000):
             }
         });
 
-        // Actualizar el valor mostrado del slider
+        // Actualizar valor del slider
         document.getElementById('num_matrices').addEventListener('input', function() {
             document.getElementById('num_matrices_value').textContent = this.value;
         });
