@@ -164,6 +164,8 @@
         <li class="nav-item"><a class="nav-link" href="#" id="navProjects">Projects</a></li>
         <li class="nav-item"><a class="nav-link" href="#publications" id="navPublications">Publications</a></li>
         <li class="nav-item"><a class="nav-link" href="#" id="navCV">CV</a></li>
+        <!-- NUEVO: enlace a eigen.html -->
+        <li class="nav-item"><a class="nav-link" href="eigen.html" id="navEigen">Eigen Simulator</a></li>
         <li class="nav-item">
           <button class="btn btn-lang ms-2" id="langToggle">🇪🇸 Español</button>
         </li>
@@ -300,6 +302,7 @@
       navProjects: "Projects",
       navPublications: "Publications",
       navCV: "CV",
+      navEigen: "Eigen Simulator", // NUEVO
       bio1: "Welcome to my webpage! I am an Associate Professor at the Faculty of Science, UNAM, specializing in Noncommutative Algebra, Group Theory, and Order Theory. I obtained my Doctorate in Mathematics from the Instituto de Matemáticas, UNAM, under the guidance of Dr. José Ríos and Dr. Francisco Raggi.",
       bio2: "I have directed 19 theses at both Bachelor's and Master's levels, guiding students in diverse areas such as finance, machine learning, game theory, category theory, ring theory, order theory, and algebraic topology. I am passionate about both teaching and research, striving to foster a stimulating academic environment for my students while contributing to the advancement of knowledge in my field.",
       contactAddress: "Science Faculty, UNAM<br>Investigación Científica<br>Mexico City, Mexico",
@@ -320,6 +323,7 @@
       navProjects: "Proyectos",
       navPublications: "Publicaciones",
       navCV: "CV",
+      navEigen: "Simulador Eigen", // NUEVO
       bio1: "¡Bienvenido a mi página web! Soy Profesor Asociado en la Facultad de Ciencias, UNAM, especializado en Álgebra No Conmutativa, Teoría de Grupos y Teoría del Orden. Obtuve mi Doctorado en Matemáticas en el Instituto de Matemáticas, UNAM, bajo la dirección de los doctores José Ríos y Francisco Raggi.",
       bio2: "He dirigido 19 tesis de licenciatura y maestría, guiando a estudiantes en diversas áreas como finanzas, aprendizaje automático, teoría de juegos, teoría de categorías, teoría de anillos, teoría del orden y topología algebraica. Me apasiona tanto la docencia como la investigación, esforzándome por fomentar un ambiente académico estimulante para mis estudiantes mientras contribuyo al avance del conocimiento en mi campo.",
       contactAddress: "Facultad de Ciencias, UNAM<br>Investigación Científica<br>Ciudad de México, México",
@@ -346,6 +350,7 @@
     document.getElementById('navProjects').innerText = t.navProjects;
     document.getElementById('navPublications').innerText = t.navPublications;
     document.getElementById('navCV').innerText = t.navCV;
+    document.getElementById('navEigen').innerText = t.navEigen; // NUEVO
     document.getElementById('bio1').innerHTML = t.bio1;
     document.getElementById('bio2').innerHTML = t.bio2;
     document.getElementById('contactAddress').innerHTML = t.contactAddress;
