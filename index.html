@@ -204,6 +204,14 @@
     <div class="col-md-8">
       <!-- Todos los encabezados y textos de sección tienen ID para traducción -->
       <h2 id="publicationsTitle">Publications</h2>
+      
+      <!-- NUEVA SECCIÓN: PREPRINTS -->
+      <strong id="preprintsLabel">Preprints</strong><br/>
+      <ul>
+        <li><a href="https://arxiv.org/abs/1805.03299" target="_blank">Matricial Closure</a> Frank Murphy-Hernandez, Francisco Raggi, Jose Rios (2018)</li>
+        <li><a href="https://arxiv.org/abs/1511.01222" target="_blank">Classes of Preradicals Induced by Relative Injectivity</a> Frank Murphy-Hernandez, Jose Ríos (2015)</li>
+      </ul>
+
       <strong id="peerReviewedLabel">Peer-reviewed</strong><br/>
       <ul><li class="paper"><a href="https://link.springer.com/article/10.1007/s00012-020-00669-3" target="_blank">The category of G-posets</a> Frank Murphy-Hernandez</li></ul>
 
@@ -254,7 +262,6 @@
         <li><a href="https://github.com/fmurphymx/fmurphymx.github.io/raw/main/Tesis/chida.pdf">Una introducción al comercio de alta frecuencia (HFT): propiedades y pronósticos del libro de órdenes</a> Carlos Octavio Chida Suarez (2013)</li>
       </ol>
 
-      <!-- SECCIÓN TRANSLATIONS ACTUALIZADA CON LA NUEVA TRADUCCIÓN -->
       <strong id="translationsLabel">Translations</strong><br/>
       <ul>
         <li>
@@ -267,7 +274,6 @@
             δ-rings and λ-rings - André Joyal
           </a> English Translation
         </li>
-        <!-- NUEVA TRADUCCIÓN DE JOYAL -->
         <li>
           <a href="https://github.com/fmurphymx/fmurphymx.github.io/raw/main/Traducciones/Joyal_Witt_vectors.pdf" target="_blank">
             δ-rings and Witt vectors - André Joyal
@@ -324,6 +330,7 @@
       contactAddress: "Science Faculty, UNAM<br>Investigación Científica<br>Mexico City, Mexico",
       profilesTitle: "Profiles",
       publicationsTitle: "Publications",
+      preprintsLabel: "Preprints",
       peerReviewedLabel: "Peer-reviewed",
       underRevisionLabel: "Under revision",
       inProgressLabel: "In Progress",
@@ -345,6 +352,7 @@
       contactAddress: "Facultad de Ciencias, UNAM<br>Investigación Científica<br>Ciudad de México, México",
       profilesTitle: "Perfiles",
       publicationsTitle: "Publicaciones",
+      preprintsLabel: "Preimpresos",
       peerReviewedLabel: "Arbitradas",
       underRevisionLabel: "En revisión",
       inProgressLabel: "En progreso",
@@ -372,6 +380,7 @@
     document.getElementById('contactAddress').innerHTML = t.contactAddress;
     document.getElementById('profilesTitle').innerHTML = `<i class="bi bi-link-45deg"></i> ${t.profilesTitle}`;
     document.getElementById('publicationsTitle').innerText = t.publicationsTitle;
+    document.getElementById('preprintsLabel').innerText = t.preprintsLabel;
     document.getElementById('peerReviewedLabel').innerText = t.peerReviewedLabel;
     document.getElementById('underRevisionLabel').innerText = t.underRevisionLabel;
     document.getElementById('inProgressLabel').innerText = t.inProgressLabel;
