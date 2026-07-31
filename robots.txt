@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://fmurphymx.github.io/sitemap.xml
