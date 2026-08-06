@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compacidad: El Juego del Cubrimiento</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 750px;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-top: 0;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .subtitle {
+            color: #7f8c8d;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+        canvas {
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
+            background: #ffffff;
+            cursor: crosshair;
+            display: block;
+            margin: 15px auto;
+            width: 100%;
+            height: auto;
+            max-width: 600px;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin: 20px 0;
+        }
+        .controls button {
+            background: #3498db;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .controls button:hover {
+            background: #2980b9;
+        }
+        .controls button:active {
+            transform: scale(0.95);
+        }
+        .controls button.danger {
+            background: #e74c3c;
+        }
+        .controls button.danger:hover {
+            background: #c0392b;
+        }
+        .controls button.success {
+            background: #27ae60;
+        }
+        .controls button.success:hover {
+            background: #1e8449;
+        }
+        .info-box {
+            background: #ecf0f1;
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 15px;
+            font-size: 14px;
+            color: #2c3e50;
+            text-align: left;
+        }
+        .info-box strong {
+            color: #2980b9;
+        }
+        .badge {
+            display: inline-block;
+            background: #2c3e50;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin: 2px;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 13px;
+            color: #95a5a6;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🧩 Compacidad: El Juego del Cubrimiento</h1>
+    <p class="subtitle">¿Puedes cubrir el conjunto <strong>K</strong> con un número finito de bolas?</p>
+
+    <canvas id="canvas" width="600" height="600"></canvas>
+
+    <div class="controls">
+        <button id="addBallBtn">➕ Añadir bola (clic en canvas)</button>
+        <button id="clearBallsBtn" class="danger">🗑️ Limpiar bolas</button>
+        <button id="findSubcoverBtn" class="success">🎯 Encontrar subcubrimiento finito</button>
+    </div>
+
+    <div class="info-box" id="infoBox">
+        <strong>💡 Instrucciones:</strong>
+        Haz clic en el canvas para añadir una bola (disco) de radio fijo.
+        Intenta cubrir todos los puntos del conjunto <strong>K</strong> (el círculo azul).
+        Cuando lo logres, presiona <strong>"Encontrar subcubrimiento finito"</strong>.
+    </div>
+
+    <div class="footer">
+        Visualización para el curso de Análisis Matemático I · Facultad de Ciencias, UNAM
+    </div>
+</div>
+
+<script>
+    (function() {
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const infoBox = document.getElementById('infoBox');
+
+        // --- Configuración ---
+        const W = 600, H = 600;
+        const RADIUS = 45; // Radio de las bolas que el usuario añade
+        const K_CENTER = { x: 300, y: 300 };
+        const K_RADIUS = 120; // Radio del conjunto K (círculo azul)
+
+        // --- Estado ---
+        let balls = []; // Array de {x, y}
+
+        // --- Funciones Auxiliares ---
+        function distance(p1, p2) {
+            return Math.hypot(p1.x - p2.x, p1.y - p2.y);
+        }
+
+        // Dibuja todo el escenario
+        function draw() {
+            ctx.clearRect(0, 0, W, H);
+
+            // 1. Dibujar el conjunto K (círculo azul)
+            ctx.beginPath();
+            ctx.arc(K_CENTER.x, K_CENTER.y, K_RADIUS, 0, 2 * Math.PI);
+            ctx.fillStyle = 'rgba(52, 152, 219, 0.2)';
+            ctx.fill();
+            ctx.strokeStyle = '#2980b9';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            ctx.fillStyle = '#2980b9';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('K', K_CENTER.x, K_CENTER.y);
+
+            // 2. Dibujar todas las bolas (discos) añadidas
+            balls.forEach((ball, index) => {
+                // Relleno semitransparente
+                ctx.beginPath();
+                ctx.arc(ball.x, ball.y, RADIUS, 0, 2 * Math.PI);
+                ctx.fillStyle = 'rgba(231, 76, 60, 0.25)';
+                ctx.fill();
+                ctx.strokeStyle = '#e74c3c';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Centro de la bola
+                ctx.beginPath();
+                ctx.arc(ball.x, ball.y, 4, 0, 2 * Math.PI);
+                ctx.fillStyle = '#c0392b';
+                ctx.fill();
+            });
+
+            // 3. Mostrar estadísticas
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'top';
+            ctx.fillText(`Bolas añadidas: ${balls.length}`, 15, 15);
+
+            // 4. Evaluar si K está cubierto
+            const isCovered = checkCoverage();
+            ctx.fillStyle = isCovered ? '#27ae60' : '#e67e22';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'top';
+            ctx.fillText(isCovered ? '✅ K está completamente cubierto' : '⚠️ K NO está completamente cubierto', W - 15, 15);
+
+            // Actualizar mensaje de información
+            if (isCovered) {
+                infoBox.innerHTML = `
+                    <strong>🎉 ¡Cubrimiento completado!</strong> 
+                    Has cubierto todo K con ${balls.length} bolas. 
+                    Ahora presiona <strong>"Encontrar subcubrimiento finito"</strong> 
+                    para ver cómo se selecciona un subconjunto finito que sigue cubriendo K.
+                `;
+            } else {
+                infoBox.innerHTML = `
+                    <strong>💡 Instrucciones:</strong>
+                    Haz clic en el canvas para añadir una bola (disco) de radio fijo.
+                    Intenta cubrir todos los puntos del conjunto <strong>K</strong> (el círculo azul).
+                    Cuando lo logres, presiona <strong>"Encontrar subcubrimiento finito"</strong>.
+                `;
+            }
+        }
+
+        // Verifica si todos los puntos de K están cubiertos por al menos una bola
+        function checkCoverage() {
+            if (balls.length === 0) return false;
+
+            // Muestreamos puntos en la circunferencia y en el interior de K
+            const numPoints = 200; // Puntos a muestrear
+            for (let i = 0; i < numPoints; i++) {
+                const angle = (i / numPoints) * 2 * Math.PI;
+                // Muestreamos en todo el disco, no solo en el borde
+                const r = Math.sqrt(Math.random()) * K_RADIUS; // para muestreo uniforme en el círculo
+                const px = K_CENTER.x + r * Math.cos(angle);
+                const py = K_CENTER.y + r * Math.sin(angle);
+                
+                let covered = false;
+                for (const ball of balls) {
+                    if (distance({x: px, y: py}, ball) <= RADIUS) {
+                        covered = true;
+                        break;
+                    }
+                }
+                if (!covered) return false;
+            }
+            return true;
+        }
+
+        // --- Algoritmo para encontrar un subcubrimiento finito ---
+        function findSubcover() {
+            if (balls.length === 0) {
+                alert('Primero añade algunas bolas para cubrir K.');
+                return;
+            }
+
+            if (!checkCoverage()) {
+                alert('K no está completamente cubierto. Añade más bolas hasta cubrirlo.');
+                return;
+            }
+
+            // Algoritmo greedy: seleccionar la bola que cubre la mayor área no cubierta
+            let coveredPoints = new Array(300).fill(false); // puntos muestreados
+            const testPoints = [];
+            for (let i = 0; i < 300; i++) {
+                const angle = (i / 300) * 2 * Math.PI;
+                const r = Math.sqrt(Math.random()) * K_RADIUS;
+                testPoints.push({
+                    x: K_CENTER.x + r * Math.cos(angle),
+                    y: K_CENTER.y + r * Math.sin(angle)
+                });
+            }
+
+            const selectedIndices = [];
+            let remaining = testPoints.length;
+
+            while (remaining > 0) {
+                let bestIdx = -1;
+                let bestCoverage = 0;
+
+                for (let i = 0; i < balls.length; i++) {
+                    if (selectedIndices.includes(i)) continue;
+                    let count = 0;
+                    for (let j = 0; j < testPoints.length; j++) {
+                        if (!coveredPoints[j]) {
+                            if (distance(testPoints[j], balls[i]) <= RADIUS) {
+                                count++;
+                            }
+                        }
+                    }
+                    if (count > bestCoverage) {
+                        bestCoverage = count;
+                        bestIdx = i;
+                    }
+                }
+
+                if (bestIdx === -1) break; // No debería pasar si K está cubierto
+
+                selectedIndices.push(bestIdx);
+                // Marcar puntos cubiertos por esta bola
+                for (let j = 0; j < testPoints.length; j++) {
+                    if (!coveredPoints[j]) {
+                        if (distance(testPoints[j], balls[bestIdx]) <= RADIUS) {
+                            coveredPoints[j] = true;
+                            remaining--;
+                        }
+                    }
+                }
+            }
+
+            // Resaltar las bolas seleccionadas
+            const selectedBalls = selectedIndices.map(i => balls[i]);
+            
+            // Dibujar de nuevo y resaltar
+            draw();
+            
+            // Dibujar las bolas seleccionadas con un borde más grueso y color dorado
+            selectedBalls.forEach(ball => {
+                ctx.beginPath();
+                ctx.arc(ball.x, ball.y, RADIUS, 0, 2 * Math.PI);
+                ctx.strokeStyle = '#f1c40f';
+                ctx.lineWidth = 6;
+                ctx.stroke();
+                // Marcar el centro
+                ctx.beginPath();
+                ctx.arc(ball.x, ball.y, 6, 0, 2 * Math.PI);
+                ctx.fillStyle = '#f39c12';
+                ctx.fill();
+            });
+
+            // Mostrar mensaje
+            infoBox.innerHTML = `
+                <strong>🎯 Subcubrimiento finito encontrado!</strong>
+                Se seleccionaron <strong>${selectedBalls.length}</strong> bolas de un total de ${balls.length}.
+                Estas ${selectedBalls.length} bolas son suficientes para cubrir todo K.
+                <span style="display:block; margin-top:5px; background:#fef9e7; padding:5px; border-radius:4px;">
+                ⭐ Las bolas seleccionadas se muestran con borde dorado.
+                </span>
+            `;
+        }
+
+        // --- Manejadores de Eventos ---
+        canvas.addEventListener('click', function(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            const x = (e.clientX - rect.left) * scaleX;
+            const y = (e.clientY - rect.top) * scaleY;
+            
+            // Añadir la bola
+            balls.push({x, y});
+            draw();
+        });
+
+        document.getElementById('addBallBtn').addEventListener('click', function() {
+            // Añadir una bola en una posición aleatoria dentro del canvas
+            const x = 30 + Math.random() * (W - 60);
+            const y = 30 + Math.random() * (H - 60);
+            balls.push({x, y});
+            draw();
+        });
+
+        document.getElementById('clearBallsBtn').addEventListener('click', function() {
+            balls = [];
+            draw();
+            infoBox.innerHTML = `
+                <strong>🧹 Bolas eliminadas.</strong>
+                Haz clic en el canvas para empezar de nuevo.
+            `;
+        });
+
+        document.getElementById('findSubcoverBtn').addEventListener('click', findSubcover);
+
+        // --- Dibujo Inicial ---
+        draw();
+
+    })();
+</script>
+
+</body>
+</html>
