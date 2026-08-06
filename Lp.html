@@ -17,6 +17,39 @@
             border-bottom: 2px solid #1f77b4;
             padding-bottom: 10px;
         }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        .back-button {
+            display: inline-block;
+            background: #1f77b4;
+            color: white !important;
+            padding: 6px 16px;
+            border-radius: 6px;
+            font-weight: bold;
+            text-decoration: none;
+            font-size: 14px;
+            transition: background 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .back-button:hover {
+            background: #145a8a;
+            text-decoration: none;
+        }
+        .explanation {
+            background: #e8f0fe;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #1f77b4;
+            font-size: 15px;
+            line-height: 1.6;
+            text-align: left;
+        }
         .controls {
             background: white;
             padding: 20px;
@@ -69,20 +102,57 @@
             font-size: 14px;
             color: #555;
         }
-        .back-link {
-            display: inline-block;
+        .footer {
             margin-top: 20px;
-            color: #1f77b4;
-            text-decoration: none;
+            font-size: 13px;
+            color: #95a5a6;
+            text-align: center;
+            border-top: 1px solid #ecf0f1;
+            padding-top: 15px;
         }
-        .back-link:hover {
-            text-decoration: underline;
+        .counter-container {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+        }
+        .counter-container a {
+            display: inline-block;
+            margin: 0 5px;
+        }
+        @media (max-width: 600px) {
+            .top-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            input[type="range"] {
+                width: 180px;
+            }
         }
     </style>
 </head>
 <body>
 
+    <!-- Barra superior con enlace de regreso -->
+    <div class="top-bar">
+        <a href="index.html" class="back-button">← Volver a la página principal</a>
+        <span style="font-size:14px; color:#7f8c8d;">⚪ Norma Lₚ</span>
+    </div>
+
     <h1>⚪ Bola unitaria en norma L<sub>p</sub></h1>
+
+    <!-- Explicación añadida -->
+    <div class="explanation">
+        <strong>📐 ¿Qué simula esta herramienta?</strong><br>
+        Visualiza la <strong>bola unitaria</strong> en el plano ℝ² bajo la <strong>norma Lₚ</strong> (también llamada norma p o norma de Minkowski). 
+        La norma Lₚ de un vector (x, y) se define como <strong>||(x,y)||ₚ = (|x|ᵖ + |y|ᵖ)<sup>1/p</sup></strong>. 
+        La bola unitaria es el conjunto de puntos que satisfacen ||(x,y)||ₚ ≤ 1. 
+        Arrastrando el control deslizante puedes ver cómo cambia la forma de la bola al variar p: 
+        para <strong>p = 1</strong> se obtiene un rombo (norma Manhattan), para <strong>p = 2</strong> el círculo euclidiano, 
+        y para <strong>p → ∞</strong> tiende a un cuadrado (norma del supremo). 
+        También se muestran los casos intermedios donde la curva se "hincha" o se "encoge".
+    </div>
 
     <div class="controls">
         <div class="control-group">
@@ -101,7 +171,17 @@
         </div>
     </div>
 
-    <a href="#" class="back-link">← Volver a la página principal</a>
+    <div class="footer">
+        Visualización para el curso de Análisis Matemático I · Facultad de Ciencias, UNAM
+    </div>
+
+    <!-- Contador de visitas con FlagCounter -->
+    <div class="counter-container">
+        <a href="https://info.flagcounter.com/vila">
+            <img src="https://s01.flagcounter.com/count/vila/bg_FFFFFF/txt_000000/border_CCCCCC/columns_1/maxflags_5/viewers_3/labels_1/pageviews_1/flags_0/percent_0/" alt="Flag Counter" border="0">
+        </a>
+        <img src="https://www.flagcounter.com/count2/BGFF/bg=FFFFFF/txt=000000/border=CCCCCC/columns=1/maxflags=1/viewers=0/labels=0/" alt=" " border="0">
+    </div>
 
     <script>
         const canvas = document.getElementById('canvas');
