@@ -3,21 +3,16 @@
 <head>
   <title>Frank Patrick Murphy Hernandez | Matemáticas UNAM</title>
   <meta name="description" content="Frank Patrick Murphy Hernandez. Profesor Asociado de la Facultad de Ciencias, UNAM. Investigación en Álgebra No Conmutativa, Teoría de Grupos, Teoría del Orden y Matemáticas.">
-
-<meta name="keywords" content="Frank Murphy, Frank Patrick Murphy Hernandez, UNAM, Matemáticas, Álgebra, Group Theory, Order Theory">
-
-<meta name="author" content="Frank Patrick Murphy Hernandez">
-
-<link rel="canonical" href="https://fmurphymx.github.io/">
-
-<meta name="robots" content="index,follow">
-
-<!-- Open Graph -->
-<meta property="og:type" content="website">
-<meta property="og:title" content="Frank Patrick Murphy Hernandez">
-<meta property="og:description" content="Profesor Asociado de la Facultad de Ciencias, UNAM.">
-<meta property="og:url" content="https://fmurphymx.github.io/">
-<meta property="og:image" content="https://fmurphymx.github.io/photo.jpg">
+  <meta name="keywords" content="Frank Murphy, Frank Patrick Murphy Hernandez, UNAM, Matemáticas, Álgebra, Group Theory, Order Theory">
+  <meta name="author" content="Frank Patrick Murphy Hernandez">
+  <link rel="canonical" href="https://fmurphymx.github.io/">
+  <meta name="robots" content="index,follow">
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Frank Patrick Murphy Hernandez">
+  <meta property="og:description" content="Profesor Asociado de la Facultad de Ciencias, UNAM.">
+  <meta property="og:url" content="https://fmurphymx.github.io/">
+  <meta property="og:image" content="https://fmurphymx.github.io/photo.jpg">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   
@@ -68,6 +63,26 @@
       color: #2A9D8F !important;
       background-color: rgba(42, 157, 143, 0.08);
       transform: translateY(-1px);
+    }
+    /* Estilos para dropdown */
+    .navbar-nav .dropdown-menu {
+      border: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      border-radius: 12px;
+      padding: 0.5rem 0;
+    }
+    .navbar-nav .dropdown-item {
+      font-weight: 400;
+      color: #495057;
+      padding: 0.5rem 1.2rem;
+      transition: background 0.15s;
+    }
+    .navbar-nav .dropdown-item:hover {
+      background-color: rgba(42, 157, 143, 0.06);
+      color: #2A9D8F;
+    }
+    .navbar-nav .dropdown-divider {
+      margin: 0.3rem 0;
     }
     .navbar-toggler {
       border: none;
@@ -182,7 +197,7 @@
 </head>
 <body>
 
-<!-- Barra de navegación con botón de idioma -->
+<!-- Barra de navegación con menú desplegable -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
   <div class="container">
     <a class="navbar-brand" href="index.html">
@@ -198,8 +213,23 @@
         <li class="nav-item"><a class="nav-link" href="#" id="navProjects">Projects</a></li>
         <li class="nav-item"><a class="nav-link" href="#publications" id="navPublications">Publications</a></li>
         <li class="nav-item"><a class="nav-link" href="#" id="navCV">CV</a></li>
-        <!-- Enlace a eigen.html -->
-        <li class="nav-item"><a class="nav-link" href="eigen.html" id="navEigen">Eigen Simulator</a></li>
+        
+        <!-- NUEVO MENÚ DESPLEGABLE -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="simuladoresDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <span id="navSimuladores">Simuladores</span>
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="simuladoresDropdown">
+            <li><h6 class="dropdown-header" id="dropdownHeaderAlgebra">Álgebra Lineal</h6></li>
+            <li><a class="dropdown-item" href="eigen.html" id="navEigen">Eigen Simulator</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><h6 class="dropdown-header" id="dropdownHeaderAnalisis">Análisis Matemático</h6></li>
+            <li><a class="dropdown-item" href="conv.html" id="navConv">Convergencia ε-N</a></li>
+            <li><a class="dropdown-item" href="comp.html" id="navComp">Compacidad (Cubrimiento)</a></li>
+            <li><a class="dropdown-item" href="Lp.html" id="navLp">Bola unitaria L<sub>p</sub></a></li>
+          </ul>
+        </li>
+
         <li class="nav-item">
           <button class="btn btn-lang ms-2" id="langToggle">🇪🇸 Español</button>
         </li>
@@ -263,7 +293,6 @@
         <li class="paper"><a href="https://github.com/fmurphymx/fmurphymx.github.io/raw/main/Articulos/Monoidal Geometry.pdf" target="_blank">The Cofree Functor on G-Sets and Its Approximations</a> Frank Murphy-Hernandez</li>
         <li class="paper"><a href="https://github.com/fmurphymx/fmurphymx.github.io/raw/main/Articulos/Monoidal Geometry.pdf" target="_blank">Monoidal Vector Bundles</a> Frank Murphy-Hernandez and Eduardo Leon</li>
         <li class="paper"><a href="https://github.com/fmurphymx/fmurphymx.github.io/raw/main/Articulos/Comonad Cohomology.pdf" target="_blank">Comonadic Cohomology in G-set as an Extension of Group Cohomology</a> Frank Murphy-Hernandez and Fabio Calo</li>
-        <!-- NUEVO: artículo con Fernando Cornejo -->
         <li class="paper"><a href="https://github.com/fmurphymx/fmurphymx.github.io/raw/main/Articulos/CP Super Rings.pdf" target="_blank">Gabriel-Popescu Super Rings</a> Frank Murphy-Hernandez and Fernando Cornejo-Montano</li>
       </ul>
 
@@ -281,7 +310,7 @@
         <li class="paper"><a href="https://github.com/fmurphymx/fmurphymx.github.io/raw/main/Libros/CS.pdf">Notas de Conjuntos Simpliciales</a>. Notas de Conjuntos Simpliciales</li>
       </ul>
 
-      <strong id="notesLabel">Notes from Courses</strong><br/>
+      <strong id="notesLabel2">Notes from Courses</strong><br/>
       <ul>
         <li class="paper"><a href="https://github.com/fmurphymx/fmurphymx.github.io/raw/main/Notas/VI.pdf">Notas sobre Volatilidad Implicita</a>. Notas sobre Volatilidad Implicita</li>
       </ul>
@@ -361,14 +390,20 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-  // Diccionario de traducciones
+  // Diccionario de traducciones (añadidas entradas para el menú desplegable)
   const translations = {
     en: {
       navHome: "Home",
       navProjects: "Projects",
       navPublications: "Publications",
       navCV: "CV",
+      navSimuladores: "Simulators",
       navEigen: "Eigen Simulator",
+      navConv: "Convergence ε-N",
+      navComp: "Compactness (Covering)",
+      navLp: "L<sub>p</sub> unit ball",
+      dropdownHeaderAlgebra: "Linear Algebra",
+      dropdownHeaderAnalisis: "Mathematical Analysis",
       bio1: "Welcome to my webpage! I am an Associate Professor at the Faculty of Science, UNAM, specializing in Noncommutative Algebra, Group Theory, and Order Theory. I obtained my Doctorate in Mathematics from the Instituto de Matemáticas, UNAM, under the guidance of Dr. José Ríos and Dr. Francisco Raggi.",
       bio2: "I have directed 19 theses at both Bachelor's and Master's levels, guiding students in diverse areas such as finance, machine learning, game theory, category theory, ring theory, order theory, and algebraic topology. I am passionate about both teaching and research, striving to foster a stimulating academic environment for my students while contributing to the advancement of knowledge in my field.",
       contactAddress: "Science Faculty, UNAM<br>Investigación Científica<br>Mexico City, Mexico",
@@ -390,7 +425,13 @@
       navProjects: "Proyectos",
       navPublications: "Publicaciones",
       navCV: "CV",
+      navSimuladores: "Simuladores",
       navEigen: "Simulador Eigen",
+      navConv: "Convergencia ε-N",
+      navComp: "Compacidad (Cubrimiento)",
+      navLp: "Bola unitaria L<sub>p</sub>",
+      dropdownHeaderAlgebra: "Álgebra Lineal",
+      dropdownHeaderAnalisis: "Análisis Matemático",
       bio1: "¡Bienvenido a mi página web! Soy Profesor Asociado en la Facultad de Ciencias, UNAM, especializado en Álgebra No Conmutativa, Teoría de Grupos y Teoría del Orden. Obtuve mi Doctorado en Matemáticas en el Instituto de Matemáticas, UNAM, bajo la dirección de los doctores José Ríos y Francisco Raggi.",
       bio2: "He dirigido 19 tesis de licenciatura y maestría, guiando a estudiantes en diversas áreas como finanzas, aprendizaje automático, teoría de juegos, teoría de categorías, teoría de anillos, teoría del orden y topología algebraica. Me apasiona tanto la docencia como la investigación, esforzándome por fomentar un ambiente académico estimulante para mis estudiantes mientras contribuyo al avance del conocimiento en mi campo.",
       contactAddress: "Facultad de Ciencias, UNAM<br>Investigación Científica<br>Ciudad de México, México",
@@ -418,7 +459,13 @@
     document.getElementById('navProjects').innerText = t.navProjects;
     document.getElementById('navPublications').innerText = t.navPublications;
     document.getElementById('navCV').innerText = t.navCV;
-    document.getElementById('navEigen').innerText = t.navEigen;
+    document.getElementById('navSimuladores').innerText = t.navSimuladores;
+    document.getElementById('navEigen').innerHTML = t.navEigen;
+    document.getElementById('navConv').innerHTML = t.navConv;
+    document.getElementById('navComp').innerHTML = t.navComp;
+    document.getElementById('navLp').innerHTML = t.navLp;
+    document.getElementById('dropdownHeaderAlgebra').innerText = t.dropdownHeaderAlgebra;
+    document.getElementById('dropdownHeaderAnalisis').innerText = t.dropdownHeaderAnalisis;
     document.getElementById('bio1').innerHTML = t.bio1;
     document.getElementById('bio2').innerHTML = t.bio2;
     document.getElementById('contactAddress').innerHTML = t.contactAddress;
@@ -429,6 +476,7 @@
     document.getElementById('underRevisionLabel').innerText = t.underRevisionLabel;
     document.getElementById('inProgressLabel').innerText = t.inProgressLabel;
     document.getElementById('notesLabel').innerText = t.notesLabel;
+    document.getElementById('notesLabel2').innerText = t.notesLabel; // segunda etiqueta
     document.getElementById('thesesLabel').innerText = t.thesesLabel;
     document.getElementById('translationsLabel').innerText = t.translationsLabel;
     document.getElementById('rpubsLabel').innerText = t.rpubsLabel;
