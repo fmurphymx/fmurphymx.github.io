@@ -44,6 +44,30 @@
             line-height: 1.6;
             text-align: left;
         }
+        .top-links {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .back-button {
+            display: inline-block;
+            background: #3498db;
+            color: white !important;
+            padding: 8px 18px;
+            border-radius: 6px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: background 0.2s;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .back-button:hover {
+            background: #2980b9;
+            text-decoration: none;
+        }
         canvas {
             border: 2px solid #bdc3c7;
             border-radius: 8px;
@@ -104,32 +128,10 @@
         .info-box strong {
             color: #2980b9;
         }
-        .badge {
-            display: inline-block;
-            background: #2c3e50;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            margin: 2px;
-        }
         .footer {
             margin-top: 20px;
             font-size: 13px;
             color: #95a5a6;
-        }
-        a {
-            color: #3498db;
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-        .back-link {
-            display: inline-block;
-            margin-top: 20px;
-            color: #3498db;
-            font-weight: bold;
         }
         .counter-container {
             text-align: center;
@@ -141,11 +143,24 @@
             display: inline-block;
             margin: 0 5px;
         }
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <!-- Enlace de regreso visible en la parte superior -->
+    <div class="top-links">
+        <a href="index.html" class="back-button">← Volver a la página principal</a>
+        <span style="font-size:14px; color:#7f8c8d;">🧩 Juego de compacidad</span>
+    </div>
+
     <h1>🧩 Compacidad: El Juego del Cubrimiento</h1>
     <p class="subtitle">¿Puedes cubrir el conjunto <strong>K</strong> con un número finito de bolas?</p>
 
@@ -177,8 +192,6 @@
         Visualización para el curso de Análisis Matemático I · Facultad de Ciencias, UNAM
     </div>
 
-    <a href="index.html" class="back-link">← Volver a la página principal</a>
-
     <!-- Contador de visitas con FlagCounter -->
     <div class="counter-container">
         <a href="https://info.flagcounter.com/vila">
@@ -196,23 +209,20 @@
 
         // --- Configuración ---
         const W = 600, H = 600;
-        const RADIUS = 45; // Radio de las bolas que el usuario añade
+        const RADIUS = 45;
         const K_CENTER = { x: 300, y: 300 };
-        const K_RADIUS = 120; // Radio del conjunto K (círculo azul)
+        const K_RADIUS = 120;
 
         // --- Estado ---
-        let balls = []; // Array de {x, y}
+        let balls = [];
 
-        // --- Funciones Auxiliares ---
         function distance(p1, p2) {
             return Math.hypot(p1.x - p2.x, p1.y - p2.y);
         }
 
-        // Dibuja todo el escenario
         function draw() {
             ctx.clearRect(0, 0, W, H);
 
-            // 1. Dibujar el conjunto K (círculo azul)
             ctx.beginPath();
             ctx.arc(K_CENTER.x, K_CENTER.y, K_RADIUS, 0, 2 * Math.PI);
             ctx.fillStyle = 'rgba(52, 152, 219, 0.2)';
@@ -226,9 +236,7 @@
             ctx.textBaseline = 'middle';
             ctx.fillText('K', K_CENTER.x, K_CENTER.y);
 
-            // 2. Dibujar todas las bolas (discos) añadidas
-            balls.forEach((ball, index) => {
-                // Relleno semitransparente
+            balls.forEach((ball) => {
                 ctx.beginPath();
                 ctx.arc(ball.x, ball.y, RADIUS, 0, 2 * Math.PI);
                 ctx.fillStyle = 'rgba(231, 76, 60, 0.25)';
@@ -236,22 +244,18 @@
                 ctx.strokeStyle = '#e74c3c';
                 ctx.lineWidth = 2;
                 ctx.stroke();
-
-                // Centro de la bola
                 ctx.beginPath();
                 ctx.arc(ball.x, ball.y, 4, 0, 2 * Math.PI);
                 ctx.fillStyle = '#c0392b';
                 ctx.fill();
             });
 
-            // 3. Mostrar estadísticas
             ctx.fillStyle = '#2c3e50';
             ctx.font = '14px Arial';
             ctx.textAlign = 'left';
             ctx.textBaseline = 'top';
             ctx.fillText(`Bolas añadidas: ${balls.length}`, 15, 15);
 
-            // 4. Evaluar si K está cubierto
             const isCovered = checkCoverage();
             ctx.fillStyle = isCovered ? '#27ae60' : '#e67e22';
             ctx.font = 'bold 14px Arial';
@@ -259,7 +263,6 @@
             ctx.textBaseline = 'top';
             ctx.fillText(isCovered ? '✅ K está completamente cubierto' : '⚠️ K NO está completamente cubierto', W - 15, 15);
 
-            // Actualizar mensaje de información
             if (isCovered) {
                 infoBox.innerHTML = `
                     <strong>🎉 ¡Cubrimiento completado!</strong> 
@@ -277,19 +280,14 @@
             }
         }
 
-        // Verifica si todos los puntos de K están cubiertos por al menos una bola
         function checkCoverage() {
             if (balls.length === 0) return false;
-
-            // Muestreamos puntos en la circunferencia y en el interior de K
-            const numPoints = 200; // Puntos a muestrear
+            const numPoints = 200;
             for (let i = 0; i < numPoints; i++) {
                 const angle = (i / numPoints) * 2 * Math.PI;
-                // Muestreamos en todo el disco, no solo en el borde
-                const r = Math.sqrt(Math.random()) * K_RADIUS; // para muestreo uniforme en el círculo
+                const r = Math.sqrt(Math.random()) * K_RADIUS;
                 const px = K_CENTER.x + r * Math.cos(angle);
                 const py = K_CENTER.y + r * Math.sin(angle);
-                
                 let covered = false;
                 for (const ball of balls) {
                     if (distance({x: px, y: py}, ball) <= RADIUS) {
@@ -302,20 +300,17 @@
             return true;
         }
 
-        // --- Algoritmo para encontrar un subcubrimiento finito ---
         function findSubcover() {
             if (balls.length === 0) {
                 alert('Primero añade algunas bolas para cubrir K.');
                 return;
             }
-
             if (!checkCoverage()) {
                 alert('K no está completamente cubierto. Añade más bolas hasta cubrirlo.');
                 return;
             }
 
-            // Algoritmo greedy: seleccionar la bola que cubre la mayor área no cubierta
-            let coveredPoints = new Array(300).fill(false); // puntos muestreados
+            let coveredPoints = new Array(300).fill(false);
             const testPoints = [];
             for (let i = 0; i < 300; i++) {
                 const angle = (i / 300) * 2 * Math.PI;
@@ -332,7 +327,6 @@
             while (remaining > 0) {
                 let bestIdx = -1;
                 let bestCoverage = 0;
-
                 for (let i = 0; i < balls.length; i++) {
                     if (selectedIndices.includes(i)) continue;
                     let count = 0;
@@ -348,11 +342,8 @@
                         bestIdx = i;
                     }
                 }
-
-                if (bestIdx === -1) break; // No debería pasar si K está cubierto
-
+                if (bestIdx === -1) break;
                 selectedIndices.push(bestIdx);
-                // Marcar puntos cubiertos por esta bola
                 for (let j = 0; j < testPoints.length; j++) {
                     if (!coveredPoints[j]) {
                         if (distance(testPoints[j], balls[bestIdx]) <= RADIUS) {
@@ -363,27 +354,21 @@
                 }
             }
 
-            // Resaltar las bolas seleccionadas
             const selectedBalls = selectedIndices.map(i => balls[i]);
-            
-            // Dibujar de nuevo y resaltar
             draw();
-            
-            // Dibujar las bolas seleccionadas con un borde más grueso y color dorado
+
             selectedBalls.forEach(ball => {
                 ctx.beginPath();
                 ctx.arc(ball.x, ball.y, RADIUS, 0, 2 * Math.PI);
                 ctx.strokeStyle = '#f1c40f';
                 ctx.lineWidth = 6;
                 ctx.stroke();
-                // Marcar el centro
                 ctx.beginPath();
                 ctx.arc(ball.x, ball.y, 6, 0, 2 * Math.PI);
                 ctx.fillStyle = '#f39c12';
                 ctx.fill();
             });
 
-            // Mostrar mensaje
             infoBox.innerHTML = `
                 <strong>🎯 Subcubrimiento finito encontrado!</strong>
                 Se seleccionaron <strong>${selectedBalls.length}</strong> bolas de un total de ${balls.length}.
@@ -394,22 +379,17 @@
             `;
         }
 
-        // --- Manejadores de Eventos ---
         canvas.addEventListener('click', function(e) {
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width;
             const scaleY = canvas.height / rect.height;
-            
             const x = (e.clientX - rect.left) * scaleX;
             const y = (e.clientY - rect.top) * scaleY;
-            
-            // Añadir la bola
             balls.push({x, y});
             draw();
         });
 
         document.getElementById('addBallBtn').addEventListener('click', function() {
-            // Añadir una bola en una posición aleatoria dentro del canvas
             const x = 30 + Math.random() * (W - 60);
             const y = 30 + Math.random() * (H - 60);
             balls.push({x, y});
@@ -427,9 +407,7 @@
 
         document.getElementById('findSubcoverBtn').addEventListener('click', findSubcover);
 
-        // --- Dibujo Inicial ---
         draw();
-
     })();
 </script>
 
