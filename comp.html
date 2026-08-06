@@ -34,6 +34,16 @@
             margin-bottom: 20px;
             font-style: italic;
         }
+        .explanation {
+            background: #e8f0fe;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+            font-size: 15px;
+            line-height: 1.6;
+            text-align: left;
+        }
         canvas {
             border: 2px solid #bdc3c7;
             border-radius: 8px;
@@ -115,6 +125,22 @@
         a:hover {
             text-decoration: underline;
         }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #3498db;
+            font-weight: bold;
+        }
+        .counter-container {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+        }
+        .counter-container a {
+            display: inline-block;
+            margin: 0 5px;
+        }
     </style>
 </head>
 <body>
@@ -122,6 +148,15 @@
 <div class="container">
     <h1>🧩 Compacidad: El Juego del Cubrimiento</h1>
     <p class="subtitle">¿Puedes cubrir el conjunto <strong>K</strong> con un número finito de bolas?</p>
+
+    <div class="explanation">
+        <strong>🎯 ¿Qué simula esta herramienta?</strong><br>
+        Este juego interactivo te permite explorar la propiedad de <strong>compacidad</strong> en espacios métricos. 
+        El conjunto <strong>K</strong> (círculo azul) es un conjunto compacto. 
+        Tu tarea es colocar <strong>bolas abiertas</strong> (discos de radio fijo) sobre el canvas para cubrir completamente a K. 
+        Cada bola es un conjunto abierto. La propiedad de compacidad afirma que de cualquier cubrimiento por abiertos se puede extraer un <strong>subcubrimiento finito</strong>. 
+        Cuando logres cubrir K, presiona el botón <strong>"Encontrar subcubrimiento finito"</strong> y el algoritmo seleccionará un subconjunto de tus bolas que todavía cubre K, mostrándolas con borde dorado.
+    </div>
 
     <canvas id="canvas" width="600" height="600"></canvas>
 
@@ -140,6 +175,16 @@
 
     <div class="footer">
         Visualización para el curso de Análisis Matemático I · Facultad de Ciencias, UNAM
+    </div>
+
+    <a href="index.html" class="back-link">← Volver a la página principal</a>
+
+    <!-- Contador de visitas con FlagCounter -->
+    <div class="counter-container">
+        <a href="https://info.flagcounter.com/vila">
+            <img src="https://s01.flagcounter.com/count/vila/bg_FFFFFF/txt_000000/border_CCCCCC/columns_1/maxflags_5/viewers_3/labels_1/pageviews_1/flags_0/percent_0/" alt="Flag Counter" border="0">
+        </a>
+        <img src="https://www.flagcounter.com/count2/BGFF/bg=FFFFFF/txt=000000/border=CCCCCC/columns=1/maxflags=1/viewers=0/labels=0/" alt=" " border="0">
     </div>
 </div>
 
