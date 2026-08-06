@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bola unitaria en norma Lp</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fafafa;
+        }
+        h1 {
+            color: #1f77b4;
+            border-bottom: 2px solid #1f77b4;
+            padding-bottom: 10px;
+        }
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .control-group {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        label {
+            display: inline-block;
+            width: 100px;
+            font-weight: bold;
+        }
+        input[type="range"] {
+            width: 300px;
+            margin-right: 10px;
+        }
+        .value-display {
+            display: inline-block;
+            min-width: 50px;
+            text-align: center;
+            font-weight: bold;
+        }
+        input[type="number"] {
+            width: 80px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        #canvas-container {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        canvas {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+        }
+        .info {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #555;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #1f77b4;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>⚪ Bola unitaria en norma L<sub>p</sub></h1>
+
+    <div class="controls">
+        <div class="control-group">
+            <label for="pSlider">p =</label>
+            <input type="range" id="pSlider" min="0.1" max="5" step="0.01" value="2.0">
+            <span class="value-display" id="pDisplay">2.00</span>
+            <input type="number" id="pNumber" value="2.0" step="0.05" min="0.1" max="5">
+        </div>
+    </div>
+
+    <div id="canvas-container">
+        <canvas id="canvas" width="600" height="600"></canvas>
+        <div class="info">
+            Arrastra el slider o escribe un valor para cambiar p.
+            Para p=1 → rombo, p=2 → círculo, p→∞ → cuadrado.
+        </div>
+    </div>
+
+    <a href="#" class="back-link">← Volver a la página principal</a>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const pSlider = document.getElementById('pSlider');
+        const pDisplay = document.getElementById('pDisplay');
+        const pNumber = document.getElementById('pNumber');
+
+        const width = canvas.width;
+        const height = canvas.height;
+        const margin = 60;
+        const size = Math.min(width, height) - 2 * margin;
+        const cx = width / 2;
+        const cy = height / 2;
+
+        function draw(p) {
+            ctx.clearRect(0, 0, width, height);
+            
+            // Dibujar ejes
+            ctx.strokeStyle = '#aaa';
+            ctx.lineWidth = 0.5;
+            ctx.beginPath();
+            ctx.moveTo(margin, cy);
+            ctx.lineTo(width - margin, cy);
+            ctx.moveTo(cx, margin);
+            ctx.lineTo(cx, height - margin);
+            ctx.stroke();
+
+            // Dibujar marcas de los ejes
+            ctx.fillStyle = '#888';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            for (let v = -1; v <= 1; v += 0.5) {
+                if (v === 0) continue;
+                const x = cx + v * size / 2;
+                const y = cy - v * size / 2;
+                ctx.fillText(v.toFixed(1), x, cy + 5);
+                ctx.fillText(v.toFixed(1), cx + 5, y);
+            }
+
+            // Generar puntos de la bola L_p
+            const N = 10000;
+            const points = [];
+            for (let i = 0; i < N; i++) {
+                const theta = (i / N) * 2 * Math.PI;
+                const x0 = Math.cos(theta);
+                const y0 = Math.sin(theta);
+                // Calcular norma L_p
+                const norm = Math.pow(Math.abs(x0)**p + Math.abs(y0)**p, 1/p);
+                const x = x0 / norm;
+                const y = y0 / norm;
+                points.push({x, y});
+            }
+
+            // Escalar a coordenadas de píxel
+            const scale = size / 2;
+            const pixelPoints = points.map(pt => ({
+                px: cx + pt.x * scale,
+                py: cy - pt.y * scale
+            }));
+
+            // Dibujar la curva (frontera)
+            ctx.beginPath();
+            ctx.moveTo(pixelPoints[0].px, pixelPoints[0].py);
+            for (let i = 1; i < pixelPoints.length; i++) {
+                ctx.lineTo(pixelPoints[i].px, pixelPoints[i].py);
+            }
+            ctx.closePath();
+            ctx.strokeStyle = '#1f77b4';
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+
+            // Rellenar el interior
+            ctx.fillStyle = 'rgba(31, 119, 180, 0.15)';
+            ctx.fill();
+
+            // Etiqueta con el valor de p
+            ctx.fillStyle = '#1f77b4';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'bottom';
+            ctx.fillText(`p = ${p.toFixed(2)}`, margin + 10, height - margin - 5);
+        }
+
+        function update() {
+            const p = parseFloat(pSlider.value);
+            pDisplay.textContent = p.toFixed(2);
+            pNumber.value = p.toFixed(2);
+            draw(p);
+        }
+
+        // Sincronizar slider y campo numérico
+        pSlider.addEventListener('input', update);
+        pNumber.addEventListener('input', function() {
+            let val = parseFloat(this.value);
+            if (isNaN(val)) return;
+            val = Math.max(0.1, Math.min(5, val));
+            pSlider.value = val;
+            update();
+        });
+
+        // Dibujar inicial
+        update();
+
+        // Manejar redimensionamiento de la ventana (opcional)
+        window.addEventListener('resize', () => {
+            // Podríamos redibujar si cambia el tamaño, pero el canvas tiene tamaño fijo.
+        });
+    </script>
+
+</body>
+</html>
