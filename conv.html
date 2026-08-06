@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convergencia en ℝ² - Definición ε-N</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            max-width: 850px;
+            width: 100%;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-top: 0;
+            border-bottom: 3px solid #27ae60;
+            padding-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        h1 small {
+            font-size: 16px;
+            font-weight: normal;
+            color: #7f8c8d;
+        }
+        .canvas-wrapper {
+            position: relative;
+            margin: 15px 0;
+            background: #ffffff;
+            border-radius: 8px;
+            border: 2px solid #dce1e8;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            background: #fafcff;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 15px 0 10px;
+            align-items: center;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            flex: 1 1 150px;
+        }
+        .control-group label {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+        .control-group input[type="range"] {
+            flex: 1;
+            min-width: 80px;
+            height: 6px;
+            background: #dce1e8;
+            border: none;
+            border-radius: 3px;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #27ae60;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+        }
+        .value-display {
+            font-weight: bold;
+            color: #1e8449;
+            min-width: 30px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .controls button {
+            padding: 6px 16px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .controls button:active {
+            transform: scale(0.95);
+        }
+        .btn-play {
+            background: #27ae60;
+            color: white;
+        }
+        .btn-play:hover {
+            background: #1e8449;
+        }
+        .btn-play.active {
+            background: #e67e22;
+        }
+        .btn-play.active:hover {
+            background: #d35400;
+        }
+        .btn-reset {
+            background: #7f8c8d;
+            color: white;
+        }
+        .btn-reset:hover {
+            background: #5d6d7e;
+        }
+        .btn-step {
+            background: #3498db;
+            color: white;
+        }
+        .btn-step:hover {
+            background: #1f618d;
+        }
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+        select {
+            padding: 5px 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 6px;
+            font-size: 13px;
+            background: white;
+        }
+        .info-panel {
+            background: #eafaf1;
+            border-left: 4px solid #27ae60;
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-top: 12px;
+            font-size: 14px;
+            color: #1c2833;
+            line-height: 1.7;
+            min-height: 60px;
+        }
+        .info-panel strong {
+            color: #1a5276;
+        }
+        .info-panel .highlight {
+            background: #f9e79f;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .footer {
+            margin-top: 18px;
+            font-size: 13px;
+            color: #95a5a6;
+            text-align: center;
+            border-top: 1px solid #ecf0f1;
+            padding-top: 15px;
+        }
+        .footer a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        @media (max-width: 600px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .control-group {
+                flex: 1 1 auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>
+            🎯 ¿Dónde está el punto?
+            <small>Convergencia en ℝ²</small>
+        </h1>
+
+        <div class="canvas-wrapper">
+            <canvas id="canvas" width="700" height="600"></canvas>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label>📊 Sucesión</label>
+                <select id="sequenceSelect">
+                    <option value="convergent1">xₙ = (1/n, 1/n²)</option>
+                    <option value="convergent2">xₙ = (1/n, 0)</option>
+                    <option value="convergent3">xₙ = (1/(n+1), 1/(n+1))</option>
+                    <option value="divergent">xₙ = ((-1)ⁿ/n, 1/n)</option>
+                    <option value="cauchy_not_convergent">xₙ = (1 + 1/n, 2 + 1/n) → (1,2)</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>ε =</label>
+                <input type="range" id="epsilonSlider" min="5" max="120" value="40">
+                <span class="value-display" id="epsilonDisplay">40</span>
+            </div>
+            <button class="btn-step" id="stepBtn">⏭️ Paso</button>
+            <button class="btn-play" id="playBtn">▶️ Auto</button>
+            <button class="btn-reset" id="resetBtn">🔄 Reset</button>
+        </div>
+
+        <div class="info-panel" id="infoPanel">
+            <strong>💡 Definición ε-N:</strong> 
+            Una sucesión converge a L si para todo ε > 0, existe N tal que para todo n ≥ N, 
+            d(xₙ, L) < ε. Ajusta ε y avanza paso a paso para verlo en acción.
+        </div>
+
+        <div class="footer">
+            Visualización para el curso de Análisis Matemático I · Facultad de Ciencias, UNAM
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            const W = canvas.width, H = canvas.height;
+
+            // --- Estado ---
+            let currentIndex = 0;
+            let maxIndex = 50;
+            let epsilon = 40;
+            let isPlaying = false;
+            let playInterval = null;
+            let sequenceType = 'convergent1';
+
+            // --- Definición de sucesiones ---
+            // Cada sucesión devuelve { x, y } para índice n (1-indexado)
+            function getSequence(type, n) {
+                if (n <= 0) return { x: 0, y: 0 };
+                const t = n;
+                switch(type) {
+                    case 'convergent1':
+                        return { x: 300 + 180 / t, y: 300 - 120 / (t * t) };
+                    case 'convergent2':
+                        return { x: 300 + 150 / t, y: 300 };
+                    case 'convergent3':
+                        return { x: 300 + 160 / (t + 1), y: 300 - 160 / (t + 1) };
+                    case 'divergent':
+                        return { x: 300 + 100 * Math.pow(-1, t) / t, y: 300 + 120 / t };
+                    case 'cauchy_not_convergent':
+                        // Esta es Cauchy pero converge al límite (que mostramos)
+                        return { x: 300 + 120 / t, y: 300 - 80 / t };
+                    default:
+                        return { x: 300 + 200 / t, y: 300 - 200 / t };
+                }
+            }
+
+            // Límite de la sucesión (para dibujar el punto límite)
+            function getLimit(type) {
+                switch(type) {
+                    case 'convergent1':
+                        return { x: 300, y: 300 };
+                    case 'convergent2':
+                        return { x: 300, y: 300 };
+                    case 'convergent3':
+                        return { x: 300, y: 300 };
+                    case 'divergent':
+                        return null; // No converge
+                    case 'cauchy_not_convergent':
+                        return { x: 300, y: 300 };
+                    default:
+                        return { x: 300, y: 300 };
+                }
+            }
+
+            // --- Dibujar ---
+            function draw() {
+                ctx.clearRect(0, 0, W, H);
+
+                const limit = getLimit(sequenceType);
+
+                // --- Dibujar ejes ---
+                ctx.save();
+                ctx.strokeStyle = '#b0bec5';
+                ctx.lineWidth = 0.8;
+                ctx.setLineDash([4, 6]);
+                ctx.beginPath();
+                ctx.moveTo(40, H/2);
+                ctx.lineTo(W-40, H/2);
+                ctx.moveTo(W/2, 40);
+                ctx.lineTo(W/2, H-40);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.restore();
+
+                // --- Dibujar la bola de radio ε alrededor del límite (si existe) ---
+                if (limit) {
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(limit.x, limit.y, epsilon, 0, 2*Math.PI);
+                    ctx.fillStyle = 'rgba(39, 174, 96, 0.08)';
+                    ctx.fill();
+                    ctx.strokeStyle = '#27ae60';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([6, 8]);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    ctx.restore();
+
+                    // Marcar el límite
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(limit.x, limit.y, 7, 0, 2*Math.PI);
+                    ctx.fillStyle = '#1e8449';
+                    ctx.fill();
+                    ctx.strokeStyle = 'white';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    ctx.fillStyle = '#1e8449';
+                    ctx.font = 'bold 14px Arial';
+                    ctx.textAlign = 'left';
+                    ctx.textBaseline = 'bottom';
+                    ctx.fillText('L', limit.x + 12, limit.y - 5);
+                    ctx.restore();
+
+                    // Etiqueta de ε
+                    ctx.save();
+                    ctx.fillStyle = '#1e8449';
+                    ctx.font = '13px Arial';
+                    ctx.textAlign = 'left';
+                    ctx.textBaseline = 'top';
+                    ctx.fillText(`ε = ${epsilon} px`, 15, 15);
+                    ctx.restore();
+                } else {
+                    // Sucesión divergente
+                    ctx.save();
+                    ctx.fillStyle = '#e74c3c';
+                    ctx.font = 'bold 15px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'top';
+                    ctx.fillText('⚠️ Esta sucesión NO converge', W/2, 20);
+                    ctx.restore();
+                }
+
+                // --- Dibujar los puntos de la sucesión ---
+                const numPoints = Math.min(currentIndex, maxIndex);
+                for (let i = 1; i <= numPoints; i++) {
+                    const p = getSequence(sequenceType, i);
+                    const isInside = limit ? (Math.hypot(p.x - limit.x, p.y - limit.y) < epsilon) : false;
+                    
+                    ctx.save();
+                    // Tamaño y color según si está dentro o fuera de la bola
+                    const radius = (i === numPoints) ? 6 : 4;
+                    const color = (i === numPoints) ? '#e67e22' : (isInside ? '#2ecc71' : '#e74c3c');
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, radius, 0, 2*Math.PI);
+                    ctx.fillStyle = color;
+                    ctx.fill();
+                    if (i === numPoints) {
+                        ctx.strokeStyle = '#d35400';
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+                    }
+                    ctx.restore();
+
+                    // Etiqueta del índice para el último punto
+                    if (i === numPoints && numPoints > 0) {
+                        ctx.save();
+                        ctx.fillStyle = '#2c3e50';
+                        ctx.font = '12px Arial';
+                        ctx.textAlign = 'left';
+                        ctx.textBaseline = 'bottom';
+                        ctx.fillText(`n = ${i}`, p.x + 8, p.y - 4);
+                        ctx.restore();
+                    }
+                }
+
+                // --- Mostrar el N (el índice a partir del cual todos están dentro) ---
+                if (limit) {
+                    let N = -1;
+                    // Encontrar el primer índice tal que para todo n >= N, d(x_n, L) < epsilon
+                    for (let n = 1; n <= maxIndex; n++) {
+                        const p = getSequence(sequenceType, n);
+                        if (Math.hypot(p.x - limit.x, p.y - limit.y) < epsilon) {
+                            N = n;
+                            break;
+                        }
+                    }
+                    if (N === -1) N = maxIndex;
+
+                    ctx.save();
+                    ctx.fillStyle = '#2c3e50';
+                    ctx.font = '13px Arial';
+                    ctx.textAlign = 'right';
+                    ctx.textBaseline = 'top';
+                    ctx.fillText(`N = ${N} (a partir de n ≥ ${N} todos dentro)`, W-15, 15);
+                    ctx.restore();
+
+                    // Mostrar cuántos puntos están dentro
+                    let insideCount = 0;
+                    for (let i = 1; i <= numPoints; i++) {
+                        const p = getSequence(sequenceType, i);
+                        if (Math.hypot(p.x - limit.x, p.y - limit.y) < epsilon) insideCount++;
+                    }
+                    ctx.save();
+                    ctx.fillStyle = '#2c3e50';
+                    ctx.font = '13px Arial';
+                    ctx.textAlign = 'left';
+                    ctx.textBaseline = 'top';
+                    ctx.fillText(`Puntos dentro de la bola: ${insideCount}/${numPoints}`, 15, 35);
+                    ctx.restore();
+                }
+
+                // --- Información adicional en el panel ---
+                updateInfoPanel(limit, numPoints);
+            }
+
+            // --- Actualizar panel de información ---
+            function updateInfoPanel(limit, numPoints) {
+                const panel = document.getElementById('infoPanel');
+                if (!limit) {
+                    panel.innerHTML = `
+                        <strong>⚠️ Sucesión divergente:</strong> 
+                        Esta sucesión no tiene límite. Los términos oscilan o no se acercan a un punto fijo.
+                        La definición ε-N no se cumple para ningún L.
+                    `;
+                    return;
+                }
+                // Verificar si todos los puntos mostrados están dentro
+                let allInside = true;
+                for (let i = 1; i <= numPoints; i++) {
+                    const p = getSequence(sequenceType, i);
+                    if (Math.hypot(p.x - limit.x, p.y - limit.y) >= epsilon) {
+                        allInside = false;
+                        break;
+                    }
+                }
+                const status = allInside ? '✅ Todos los puntos mostrados están dentro de la bola' : 
+                                            '⚠️ Algunos puntos aún fuera de la bola';
+                const color = allInside ? '#27ae60' : '#e67e22';
+                panel.innerHTML = `
+                    <strong>📌 Definición ε-N:</strong> 
+                    Para ε = ${epsilon} px, la sucesión ${allInside ? 'ya' : 'aún no'} cumple que 
+                    todos los términos a partir de algún N están dentro de la bola.<br>
+                    <span style="color:${color}; font-weight:bold;">${status}</span>
+                    ${allInside ? ' ¡La definición se cumple!' : ' Sigue avanzando para ver la convergencia.'}
+                    <br><span style="font-size:13px; color:#555;">
+                    ${allInside ? '✅ Se encontró N = ' + getN(limit) : '🔍 Buscando N...'}
+                    </span>
+                `;
+            }
+
+            function getN(limit) {
+                for (let n = 1; n <= maxIndex; n++) {
+                    const p = getSequence(sequenceType, n);
+                    if (Math.hypot(p.x - limit.x, p.y - limit.y) < epsilon) {
+                        return n;
+                    }
+                }
+                return maxIndex;
+            }
+
+            // --- Controles ---
+            function stepForward() {
+                if (currentIndex < maxIndex) {
+                    currentIndex++;
+                    draw();
+                } else {
+                    if (isPlaying) {
+                        stopPlay();
+                    }
+                }
+            }
+
+            function resetSequence() {
+                currentIndex = 0;
+                if (isPlaying) stopPlay();
+                draw();
+            }
+
+            function togglePlay() {
+                if (isPlaying) {
+                    stopPlay();
+                } else {
+                    startPlay();
+                }
+            }
+
+            function startPlay() {
+                if (isPlaying) return;
+                isPlaying = true;
+                document.getElementById('playBtn').textContent = '⏸️ Pausa';
+                document.getElementById('playBtn').classList.add('active');
+                playInterval = setInterval(() => {
+                    if (currentIndex < maxIndex) {
+                        currentIndex++;
+                        draw();
+                    } else {
+                        stopPlay();
+                    }
+                }, 400);
+            }
+
+            function stopPlay() {
+                isPlaying = false;
+                if (playInterval) {
+                    clearInterval(playInterval);
+                    playInterval = null;
+                }
+                document.getElementById('playBtn').textContent = '▶️ Auto';
+                document.getElementById('playBtn').classList.remove('active');
+            }
+
+            // --- Eventos ---
+            document.getElementById('stepBtn').addEventListener('click', stepForward);
+            document.getElementById('playBtn').addEventListener('click', togglePlay);
+            document.getElementById('resetBtn').addEventListener('click', resetSequence);
+
+            document.getElementById('epsilonSlider').addEventListener('input', function() {
+                epsilon = parseInt(this.value);
+                document.getElementById('epsilonDisplay').textContent = epsilon;
+                draw();
+            });
+
+            document.getElementById('sequenceSelect').addEventListener('change', function() {
+                sequenceType = this.value;
+                resetSequence();
+                // Ajustar maxIndex según la sucesión
+                if (sequenceType === 'divergent') {
+                    maxIndex = 60;
+                } else {
+                    maxIndex = 50;
+                }
+                draw();
+            });
+
+            // --- Inicializar ---
+            resetSequence();
+        })();
+    </script>
+</body>
+</html>
