@@ -93,6 +93,37 @@
       outline: none;
     }
     
+    /* ===== ESTILOS PARA SUBMENÚ ANIDADO ===== */
+    .dropdown-submenu {
+      position: relative;
+    }
+    .dropdown-submenu > .dropdown-menu {
+      top: 0;
+      left: 100%;
+      margin-top: -6px;
+      margin-left: -1px;
+      border-radius: 0 6px 6px 6px;
+    }
+    /* Abrir al hacer hover en escritorio */
+    .dropdown-submenu:hover > .dropdown-menu {
+      display: block;
+    }
+    /* Ajuste para móviles */
+    @media (max-width: 991.98px) {
+      .dropdown-submenu > .dropdown-menu {
+        left: 0;
+        margin-left: 15px;
+        border-radius: 6px;
+      }
+      .dropdown-submenu:hover > .dropdown-menu {
+        display: none;
+      }
+      .dropdown-submenu > .dropdown-menu.show {
+        display: block;
+      }
+    }
+    /* ===== FIN ESTILOS SUBMENÚ ===== */
+
     .btn-lang {
       border: 1px solid #2A9D8F;
       color: #2A9D8F;
@@ -197,7 +228,7 @@
 </head>
 <body>
 
-<!-- Barra de navegación con menú desplegable -->
+<!-- Barra de navegación con menú desplegable y submenú -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
   <div class="container">
     <a class="navbar-brand" href="index.html">
@@ -214,14 +245,25 @@
         <li class="nav-item"><a class="nav-link" href="#publications" id="navPublications">Publications</a></li>
         <li class="nav-item"><a class="nav-link" href="#" id="navCV">CV</a></li>
         
-        <!-- NUEVO MENÚ DESPLEGABLE -->
+        <!-- MENÚ DESPLEGABLE PRINCIPAL CON SUBMENÚ EN EIGEN -->
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="simuladoresDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             <span id="navSimuladores">Simuladores</span>
           </a>
           <ul class="dropdown-menu" aria-labelledby="simuladoresDropdown">
+            <!-- Álgebra Lineal -->
             <li><h6 class="dropdown-header" id="dropdownHeaderAlgebra">Álgebra Lineal</h6></li>
-            <li><a class="dropdown-item" href="eigen.html" id="navEigen">Eigen Simulator</a></li>
+            
+            <!-- SUBMENÚ: Eigen Simulator -->
+            <li class="dropdown-submenu">
+              <a class="dropdown-item dropdown-toggle" href="#" id="navEigen">Eigen Simulator</a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="eigen.html" id="eigenSub1">Visualización de autovalores</a></li>
+                <li><a class="dropdown-item" href="svd.html" id="eigenSub2">Descomposición SVD</a></li>
+                <li><a class="dropdown-item" href="matrix.html" id="eigenSub3">Operaciones matriciales</a></li>
+              </ul>
+            </li>
+
             <li><hr class="dropdown-divider"></li>
             <li><h6 class="dropdown-header" id="dropdownHeaderAnalisis">Análisis Matemático</h6></li>
             <li><a class="dropdown-item" href="conv.html" id="navConv">Convergencia ε-N</a></li>
@@ -390,7 +432,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-  // Diccionario de traducciones (añadidas entradas para el menú desplegable)
+  // Diccionario de traducciones (con los nuevos elementos del submenú)
   const translations = {
     en: {
       navHome: "Home",
@@ -399,6 +441,9 @@
       navCV: "CV",
       navSimuladores: "Simulators",
       navEigen: "Eigen Simulator",
+      eigenSub1: "Eigenvalue Visualization",
+      eigenSub2: "SVD Decomposition",
+      eigenSub3: "Matrix Operations",
       navConv: "Convergence ε-N",
       navComp: "Compactness (Covering)",
       navLp: "L<sub>p</sub> unit ball",
@@ -427,6 +472,9 @@
       navCV: "CV",
       navSimuladores: "Simuladores",
       navEigen: "Simulador Eigen",
+      eigenSub1: "Visualización de autovalores",
+      eigenSub2: "Descomposición SVD",
+      eigenSub3: "Operaciones matriciales",
       navConv: "Convergencia ε-N",
       navComp: "Compacidad (Cubrimiento)",
       navLp: "Bola unitaria L<sub>p</sub>",
@@ -461,6 +509,9 @@
     document.getElementById('navCV').innerText = t.navCV;
     document.getElementById('navSimuladores').innerText = t.navSimuladores;
     document.getElementById('navEigen').innerHTML = t.navEigen;
+    document.getElementById('eigenSub1').innerHTML = t.eigenSub1;
+    document.getElementById('eigenSub2').innerHTML = t.eigenSub2;
+    document.getElementById('eigenSub3').innerHTML = t.eigenSub3;
     document.getElementById('navConv').innerHTML = t.navConv;
     document.getElementById('navComp').innerHTML = t.navComp;
     document.getElementById('navLp').innerHTML = t.navLp;
@@ -485,11 +536,37 @@
     currentLang = lang;
   }
 
+  // Alternar idioma
   document.getElementById('langToggle').addEventListener('click', () => {
     if (currentLang === 'en') {
       setLanguage('es');
     } else {
       setLanguage('en');
+    }
+  });
+
+  // ===== MANEJO DE SUBMENÚ PARA MÓVILES =====
+  document.querySelectorAll('.dropdown-submenu > a').forEach(function (element) {
+    element.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const subMenu = this.nextElementSibling;
+      if (subMenu && subMenu.classList.contains('dropdown-menu')) {
+        // Cierra otros submenús abiertos
+        document.querySelectorAll('.dropdown-submenu > .dropdown-menu.show').forEach(function (menu) {
+          if (menu !== subMenu) menu.classList.remove('show');
+        });
+        subMenu.classList.toggle('show');
+      }
+    });
+  });
+
+  // Cerrar submenús al hacer clic fuera
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('.dropdown-submenu')) {
+      document.querySelectorAll('.dropdown-submenu > .dropdown-menu.show').forEach(function (menu) {
+        menu.classList.remove('show');
+      });
     }
   });
 </script>
