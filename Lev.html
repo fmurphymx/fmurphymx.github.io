@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distancia de Levenshtein - Similitud entre palabras</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            max-width: 950px;
+            width: 100%;
+        }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        .back-button {
+            display: inline-block;
+            background: #3498db;
+            color: white !important;
+            padding: 6px 16px;
+            border-radius: 6px;
+            font-weight: bold;
+            text-decoration: none;
+            font-size: 14px;
+            transition: background 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .back-button:hover {
+            background: #2980b9;
+            text-decoration: none;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-top: 0;
+            border-bottom: 3px solid #e67e22;
+            padding-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        h1 small {
+            font-size: 16px;
+            font-weight: normal;
+            color: #7f8c8d;
+        }
+        .explanation {
+            background: #fef9e7;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #e67e22;
+            font-size: 15px;
+            line-height: 1.7;
+            text-align: left;
+        }
+        .explanation strong {
+            color: #d35400;
+        }
+        .explanation .formula {
+            background: #fcf3cf;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            display: inline-block;
+            margin: 4px 0;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: flex-end;
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            flex: 1 1 180px;
+        }
+        .control-group label {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+        .control-group input[type="text"] {
+            padding: 8px 12px;
+            border: 2px solid #dce1e8;
+            border-radius: 6px;
+            font-size: 16px;
+            font-family: 'Segoe UI', monospace;
+            transition: border 0.2s;
+            background: white;
+        }
+        .control-group input[type="text"]:focus {
+            border-color: #e67e22;
+            outline: none;
+        }
+        .controls button {
+            padding: 8px 24px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            background: #e67e22;
+            color: white;
+            transition: background 0.2s, transform 0.1s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            align-self: center;
+            height: 42px;
+        }
+        .controls button:hover {
+            background: #d35400;
+        }
+        .controls button:active {
+            transform: scale(0.95);
+        }
+        .result-box {
+            background: #ecf0f1;
+            border-radius: 8px;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+        }
+        .result-box .item {
+            background: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        }
+        .result-box .item strong {
+            color: #2980b9;
+        }
+        .result-box .item .value {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #2c3e50;
+        }
+        .result-box .item .similarity {
+            color: #27ae60;
+        }
+        .matrix-container {
+            overflow-x: auto;
+            margin: 15px 0;
+            background: #fafcff;
+            border-radius: 8px;
+            padding: 10px;
+            border: 1px solid #dce1e8;
+        }
+        #matrixTable {
+            border-collapse: collapse;
+            margin: 0 auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        #matrixTable td {
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            vertical-align: middle;
+            border: 1px solid #bdc3c7;
+            background: white;
+            transition: background 0.3s;
+            position: relative;
+        }
+        #matrixTable td.header {
+            background: #ecf0f1;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        #matrixTable td.corner {
+            background: #d5dbdb;
+        }
+        #matrixTable td.operation-insert {
+            background: #d5f5e3 !important;
+        }
+        #matrixTable td.operation-delete {
+            background: #fadbd8 !important;
+        }
+        #matrixTable td.operation-replace {
+            background: #fdebd0 !important;
+        }
+        #matrixTable td.operation-match {
+            background: #d6eaf8 !important;
+        }
+        #matrixTable td.operation-eq {
+            background: #d6eaf8 !important;
+        }
+        #matrixTable td.selected {
+            outline: 3px solid #e67e22;
+            outline-offset: -2px;
+        }
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 8px;
+            justify-content: center;
+            font-size: 13px;
+            color: #2c3e50;
+        }
+        .legend span {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .legend .color-box {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 1px solid #999;
+            border-radius: 3px;
+        }
+        .info-panel {
+            background: #eafaf1;
+            border-left: 4px solid #27ae60;
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-top: 12px;
+            font-size: 14px;
+            color: #1c2833;
+            line-height: 1.7;
+            min-height: 60px;
+        }
+        .info-panel strong {
+            color: #1a5276;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 13px;
+            color: #95a5a6;
+            text-align: center;
+            border-top: 1px solid #ecf0f1;
+            padding-top: 15px;
+        }
+        .counter-container {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+        }
+        .counter-container a {
+            display: inline-block;
+            margin: 0 5px;
+        }
+        @media (max-width: 600px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .controls button {
+                align-self: stretch;
+            }
+            .top-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            #matrixTable td {
+                width: 30px;
+                height: 30px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Barra superior -->
+    <div class="top-bar">
+        <a href="index.html" class="back-button">← Volver a la página principal</a>
+        <span style="font-size:14px; color:#7f8c8d;">🔤 Distancia de edición</span>
+    </div>
+
+    <h1>
+        ✏️ Distancia de Levenshtein
+        <small>Similitud entre palabras</small>
+    </h1>
+
+    <!-- Explicación -->
+    <div class="explanation">
+        <strong>📐 ¿Qué es la distancia de Levenshtein?</strong><br>
+        Es una métrica que mide la <strong>diferencia</strong> entre dos cadenas de texto. 
+        Se define como el <strong>número mínimo de operaciones</strong> (inserción, eliminación o sustitución de un carácter) necesarias para transformar una palabra en la otra. 
+        Cada operación tiene costo <strong>1</strong>.<br>
+        <span class="formula">Lev(a,b) = mínimo de (insertar, eliminar, sustituir)</span><br>
+        La <strong>similitud</strong> se calcula como: 
+        <span class="formula">Similitud (%) = (1 − Lev / max(|a|,|b|)) × 100</span>
+        <br><br>
+        <strong>🎯 ¿Cómo se visualiza?</strong> La matriz de programación dinámica muestra cómo se construye la distancia paso a paso. 
+        Cada celda (i,j) contiene la distancia entre los primeros <em>i</em> caracteres de la primera palabra y los primeros <em>j</em> de la segunda. 
+        Los colores indican la operación realizada: 
+        <span style="background:#d5f5e3; padding:0 6px;">🟢 inserción</span>, 
+        <span style="background:#fadbd8; padding:0 6px;">🔴 eliminación</span>, 
+        <span style="background:#fdebd0; padding:0 6px;">🟠 sustitución</span>, 
+        <span style="background:#d6eaf8; padding:0 6px;">🔵 coincidencia</span>.
+        La celda inferior derecha es la distancia final.
+    </div>
+
+    <!-- Controles -->
+    <div class="controls">
+        <div class="control-group">
+            <label for="word1">Palabra A</label>
+            <input type="text" id="word1" value="casa" placeholder="Ej. casa">
+        </div>
+        <div class="control-group">
+            <label for="word2">Palabra B</label>
+            <input type="text" id="word2" value="casas" placeholder="Ej. casas">
+        </div>
+        <button id="calcBtn">🔍 Calcular</button>
+    </div>
+
+    <!-- Resultados -->
+    <div class="result-box" id="resultBox">
+        <div class="item">Distancia: <span class="value" id="distValue">—</span></div>
+        <div class="item">Similitud: <span class="value similarity" id="simValue">—</span></div>
+        <div class="item">Palabras: <span id="wordsDisplay">—</span></div>
+    </div>
+
+    <!-- Matriz -->
+    <div class="matrix-container">
+        <table id="matrixTable">
+            <!-- Se llena con JS -->
+        </table>
+        <div class="legend">
+            <span><span class="color-box" style="background:#d5f5e3;"></span> Inserción</span>
+            <span><span class="color-box" style="background:#fadbd8;"></span> Eliminación</span>
+            <span><span class="color-box" style="background:#fdebd0;"></span> Sustitución</span>
+            <span><span class="color-box" style="background:#d6eaf8;"></span> Coincidencia</span>
+            <span><span class="color-box" style="background:white; border:2px solid #e67e22;"></span> Camino óptimo</span>
+        </div>
+    </div>
+
+    <!-- Info panel dinámico -->
+    <div class="info-panel" id="infoPanel">
+        <strong>💡 Instrucciones:</strong> Introduce dos palabras y presiona "Calcular". 
+        Observa la matriz y el camino de edición (borde naranja) que muestra la secuencia de operaciones.
+    </div>
+
+    <div class="footer">
+        Visualización para el curso de Análisis Matemático I · Facultad de Ciencias, UNAM
+    </div>
+
+    <!-- Contador de visitas -->
+    <div class="counter-container">
+        <a href="https://info.flagcounter.com/vila">
+            <img src="https://s01.flagcounter.com/count/vila/bg_FFFFFF/txt_000000/border_CCCCCC/columns_1/maxflags_5/viewers_3/labels_1/pageviews_1/flags_0/percent_0/" alt="Flag Counter" border="0">
+        </a>
+        <img src="https://www.flagcounter.com/count2/BGFF/bg=FFFFFF/txt=000000/border=CCCCCC/columns=1/maxflags=1/viewers=0/labels=0/" alt=" " border="0">
+    </div>
+</div>
+
+<script>
+    (function() {
+        const word1Input = document.getElementById('word1');
+        const word2Input = document.getElementById('word2');
+        const calcBtn = document.getElementById('calcBtn');
+        const distValue = document.getElementById('distValue');
+        const simValue = document.getElementById('simValue');
+        const wordsDisplay = document.getElementById('wordsDisplay');
+        const matrixTable = document.getElementById('matrixTable');
+        const infoPanel = document.getElementById('infoPanel');
+
+        function levenshtein(a, b) {
+            const m = a.length;
+            const n = b.length;
+            // Matriz de distancias (m+1) x (n+1)
+            const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+            // Matriz de operaciones: 0=diagonal (match/replace), 1=arriba (delete), 2=izquierda (insert)
+            const ops = Array.from({ length: m + 1 }, () => Array(n + 1).fill(-1));
+
+            for (let i = 0; i <= m; i++) {
+                dp[i][0] = i;
+                ops[i][0] = 1; // delete
+            }
+            for (let j = 0; j <= n; j++) {
+                dp[0][j] = j;
+                ops[0][j] = 2; // insert
+            }
+            ops[0][0] = -1;
+
+            for (let i = 1; i <= m; i++) {
+                for (let j = 1; j <= n; j++) {
+                    const cost = (a[i-1] === b[j-1]) ? 0 : 1;
+                    const del = dp[i-1][j] + 1;
+                    const ins = dp[i][j-1] + 1;
+                    const sub = dp[i-1][j-1] + cost;
+                    const minVal = Math.min(del, ins, sub);
+                    dp[i][j] = minVal;
+                    // Guardar operación
+                    if (minVal === del) ops[i][j] = 1;
+                    else if (minVal === ins) ops[i][j] = 2;
+                    else ops[i][j] = 0; // diagonal (match o replace)
+                }
+            }
+            // Reconstruir camino (desde (m,n) hasta (0,0))
+            const path = [];
+            let i = m, j = n;
+            while (i > 0 || j > 0) {
+                path.push({ i, j });
+                const op = ops[i][j];
+                if (op === 0) { i--; j--; }
+                else if (op === 1) { i--; }
+                else if (op === 2) { j--; }
+                else break;
+            }
+            path.push({ i: 0, j: 0 });
+            path.reverse();
+
+            return { distance: dp[m][n], matrix: dp, ops, path };
+        }
+
+        function renderMatrix(a, b, result) {
+            const m = a.length;
+            const n = b.length;
+            const dp = result.matrix;
+            const ops = result.ops;
+            const pathSet = new Set(result.path.map(p => `${p.i},${p.j}`));
+
+            // Construir tabla HTML
+            let html = '<thead><tr><td class="corner"></td>';
+            // Cabecera: caracteres de b (j)
+            html += '<td class="header">ε</td>';
+            for (let j = 0; j < n; j++) {
+                html += `<td class="header">${b[j]}</td>`;
+            }
+            html += '</tr></thead><tbody>';
+            // Filas
+            for (let i = 0; i <= m; i++) {
+                html += '<tr>';
+                // Primera columna: caracteres de a (i) o ε
+                if (i === 0) {
+                    html += '<td class="header">ε</td>';
+                } else {
+                    html += `<td class="header">${a[i-1]}</td>`;
+                }
+                for (let j = 0; j <= n; j++) {
+                    const val = dp[i][j];
+                    let cls = '';
+                    const isPath = pathSet.has(`${i},${j}`);
+                    // Clase de operación (excepto primera fila/columna)
+                    if (i > 0 && j > 0) {
+                        const op = ops[i][j];
+                        if (op === 0) {
+                            cls = (a[i-1] === b[j-1]) ? 'operation-match' : 'operation-replace';
+                        } else if (op === 1) cls = 'operation-delete';
+                        else if (op === 2) cls = 'operation-insert';
+                    } else if (i === 0 && j > 0) {
+                        cls = 'operation-insert';
+                    } else if (j === 0 && i > 0) {
+                        cls = 'operation-delete';
+                    }
+                    if (isPath) cls += ' selected';
+                    html += `<td class="${cls}">${val}</td>`;
+                }
+                html += '</tr>';
+            }
+            html += '</tbody>';
+            matrixTable.innerHTML = html;
+        }
+
+        function updateInfo(a, b, dist, sim) {
+            const maxLen = Math.max(a.length, b.length);
+            let msg = '';
+            if (dist === 0) {
+                msg = `✅ Las palabras son idénticas. Distancia = 0, similitud = 100%.`;
+            } else {
+                msg = `📊 Se necesitan <strong>${dist}</strong> operaciones para transformar "<strong>${a}</strong>" en "<strong>${b}</strong>". `;
+                msg += `La similitud es del <strong>${sim.toFixed(1)}%</strong>. `;
+                if (sim > 80) msg += '👍 Las palabras son muy parecidas.';
+                else if (sim > 50) msg += '🔍 Tienen una similitud moderada.';
+                else msg += '🔄 Son bastante diferentes.';
+            }
+            infoPanel.innerHTML = `<strong>📘 Interpretación:</strong> ${msg}`;
+        }
+
+        function calculate() {
+            const a = word1Input.value.trim();
+            const b = word2Input.value.trim();
+            if (a === '' || b === '') {
+                alert('Por favor, introduce ambas palabras.');
+                return;
+            }
+            const result = levenshtein(a, b);
+            const dist = result.distance;
+            const maxLen = Math.max(a.length, b.length);
+            const sim = maxLen === 0 ? 100 : (1 - dist / maxLen) * 100;
+            distValue.textContent = dist;
+            simValue.textContent = sim.toFixed(1) + '%';
+            wordsDisplay.textContent = `"${a}" ↔ "${b}"`;
+
+            renderMatrix(a, b, result);
+            updateInfo(a, b, dist, sim);
+        }
+
+        // Evento click
+        calcBtn.addEventListener('click', calculate);
+
+        // Calcular al presionar Enter en los inputs
+        word1Input.addEventListener('keypress', (e) => { if (e.key === 'Enter') calculate(); });
+        word2Input.addEventListener('keypress', (e) => { if (e.key === 'Enter') calculate(); });
+
+        // Cálculo inicial con valores por defecto
+        window.addEventListener('load', () => {
+            calculate();
+        });
+    })();
+</script>
+</body>
+</html>
