@@ -64,7 +64,6 @@
       background-color: rgba(42, 157, 143, 0.08);
       transform: translateY(-1px);
     }
-    /* Estilos para dropdown */
     .navbar-nav .dropdown-menu {
       border: none;
       box-shadow: 0 4px 12px rgba(0,0,0,0.08);
@@ -93,7 +92,6 @@
       outline: none;
     }
     
-    /* ===== ESTILOS PARA SUBMENÚ ANIDADO ===== */
     .dropdown-submenu {
       position: relative;
     }
@@ -104,11 +102,9 @@
       margin-left: -1px;
       border-radius: 0 6px 6px 6px;
     }
-    /* Abrir al hacer hover en escritorio */
     .dropdown-submenu:hover > .dropdown-menu {
       display: block;
     }
-    /* Ajuste para móviles */
     @media (max-width: 991.98px) {
       .dropdown-submenu > .dropdown-menu {
         left: 0;
@@ -122,7 +118,6 @@
         display: block;
       }
     }
-    /* ===== FIN ESTILOS SUBMENÚ ===== */
 
     .btn-lang {
       border: 1px solid #2A9D8F;
@@ -190,6 +185,30 @@
       border-radius: 16px;
       border: 1px solid #e7e7e7;
     }
+    .kronecker-quote {
+      font-size: 1.1rem;
+      font-style: italic;
+      color: #495057;
+      background: #f8f9fa;
+      padding: 1.2rem 2rem;
+      border-radius: 16px;
+      border-left: 4px solid #2A9D8F;
+      margin: 1.5rem 0 0.5rem 0;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+    .kronecker-quote span {
+      font-weight: 400;
+      color: #2c3e50;
+    }
+    .kronecker-quote .author {
+      font-style: normal;
+      font-weight: 600;
+      color: #1e6f64;
+      display: block;
+      margin-top: 0.3rem;
+      font-size: 0.95rem;
+    }
     footer {
       font-size: 0.85rem;
       color: #6c757d;
@@ -204,6 +223,10 @@
       }
       .navbar-brand {
         font-size: 1.3rem;
+      }
+      .kronecker-quote {
+        font-size: 1rem;
+        padding: 1rem 1.2rem;
       }
     }
   </style>
@@ -229,7 +252,7 @@
 </head>
 <body>
 
-<!-- Barra de navegación con menú desplegable y submenú -->
+<!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
   <div class="container">
     <a class="navbar-brand" href="index.html">
@@ -246,16 +269,12 @@
         <li class="nav-item"><a class="nav-link" href="#publications" id="navPublications">Publications</a></li>
         <li class="nav-item"><a class="nav-link" href="#" id="navCV">CV</a></li>
         
-        <!-- MENÚ DESPLEGABLE PRINCIPAL CON SUBMENÚ EN EIGEN -->
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="simuladoresDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             <span id="navSimuladores">Simuladores</span>
           </a>
           <ul class="dropdown-menu" aria-labelledby="simuladoresDropdown">
-            <!-- Álgebra Lineal -->
             <li><h6 class="dropdown-header" id="dropdownHeaderAlgebra">Álgebra Lineal</h6></li>
-            
-            <!-- SUBMENÚ: Eigen Simulator -->
             <li class="dropdown-submenu">
               <a class="dropdown-item dropdown-toggle" href="#" id="navEigen">Eigen Simulator</a>
               <ul class="dropdown-menu">
@@ -264,7 +283,6 @@
                 <li><a class="dropdown-item" href="matrix.html" id="eigenSub3">Operaciones matriciales</a></li>
               </ul>
             </li>
-
             <li><hr class="dropdown-divider"></li>
             <li><h6 class="dropdown-header" id="dropdownHeaderAnalisis">Análisis Matemático</h6></li>
             <li><a class="dropdown-item" href="conv.html" id="navConv">Convergencia ε-N</a></li>
@@ -309,10 +327,8 @@
 
   <div class="row mt-4">
     <div class="col-md-8">
-      <!-- Todos los encabezados y textos de sección tienen ID para traducción -->
       <h2 id="publicationsTitle">Publications</h2>
       
-      <!-- PEER-REVIEWED (ahora primero, con datos de la revista) -->
       <strong id="peerReviewedLabel">Peer-reviewed</strong><br/>
       <ul>
         <li class="paper">
@@ -321,7 +337,6 @@
         </li>
       </ul>
 
-      <!-- PREPRINTS (actualizado con enlaces a arXiv, Google Scholar y ResearchGate) -->
       <strong id="preprintsLabel">Preprints</strong><br/>
       <ul>
         <li>
@@ -352,7 +367,7 @@
 
       <strong id="inProgressLabel">In Progress</strong><br/>
       <ul>
-                <li class="paper"><a href="https://github.com/fmurphymx/fmurphymx.github.io/raw/main/Articulos/Monoidal Geometry.pdf" target="_blank">Monoidal Vector Bundles</a> Frank Murphy-Hernandez and Eduardo Leon</li>
+        <li class="paper"><a href="https://github.com/fmurphymx/fmurphymx.github.io/raw/main/Articulos/Monoidal Geometry.pdf" target="_blank">Monoidal Vector Bundles</a> Frank Murphy-Hernandez and Eduardo Leon</li>
         <li class="paper"><a href="https://github.com/fmurphymx/fmurphymx.github.io/raw/main/Articulos/Comonad Cohomology.pdf" target="_blank">Comonadic Cohomology in G-set as an Extension of Group Cohomology</a> Frank Murphy-Hernandez and Fabio Calo</li>
         <li class="paper"><a href="https://github.com/fmurphymx/fmurphymx.github.io/raw/main/Articulos/CP Super Rings.pdf" target="_blank">Gabriel-Popescu Super Rings</a> Frank Murphy-Hernandez and Fernando Cornejo-Montano</li>
       </ul>
@@ -377,7 +392,6 @@
         <li class="paper"><a href="https://github.com/fmurphymx/fmurphymx.github.io/raw/main/Notas/Littlewood.pdf">Conjetura de Littlewood</a>. Conjetura de Littlewood</li>
       </ul>
 
-      <!-- ===== SECCIÓN DE TESIS DIRIGIDAS ACTUALIZADA ===== -->
       <strong id="thesesLabel">Directed Theses</strong><br/>
       <ol class="paper-list" style="padding-left: 1.2rem;">
         <li><a href="#">Un estudio comparativo sobre algunas medidas objetivo para el análisis de reglas de asociación</a> Sonia Elizabeth Dominguez Zuñiga (2026) — Licenciatura en Actuaría</li>
@@ -431,14 +445,24 @@
   </div>
 </div>
 
+<!-- ===== CITA DE KRONECKER (colocada arriba del contador) ===== -->
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <div class="kronecker-quote">
+        <span id="quoteText">“God made the integers; all else is the work of man.”</span>
+        <span class="author">— Leopold Kronecker</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Contador de visitas (debajo de la cita) -->
 <div class="container text-center my-4">
   <div class="row">
     <div class="col-12">
-      <!-- Contador alternativo con FlagCounter (totalmente funcional) -->
       <a href="https://info.flagcounter.com/vila"><img src="https://s01.flagcounter.com/count/vila/bg_FFFFFF/txt_000000/border_CCCCCC/columns_1/maxflags_5/viewers_3/labels_1/pageviews_1/flags_0/percent_0/" alt="Flag Counter" border="0"></a>
-        <img src="https://www.flagcounter.com/count2/BGFF/bg=FFFFFF/txt=000000/border=CCCCCC/columns=1/maxflags=1/viewers=0/labels=0/" 
-             alt=" " border="0">
-      </a>
+      <img src="https://www.flagcounter.com/count2/BGFF/bg=FFFFFF/txt=000000/border=CCCCCC/columns=1/maxflags=1/viewers=0/labels=0/" alt=" " border="0">
     </div>
   </div>
 </div>
@@ -453,7 +477,6 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-  // Diccionario de traducciones (con los nuevos elementos del submenú y profiles)
   const translations = {
     en: {
       navHome: "Home",
@@ -483,11 +506,13 @@
       underRevisionLabel: "Under revision",
       inProgressLabel: "In Progress",
       notesLabel: "Notes from Courses",
+      noteLabel: "Notes",
       thesesLabel: "Directed Theses",
       translationsLabel: "Translations",
       rpubsLabel: "R Pubs",
       footerCredit: "© 2026 Frank Patrick Murphy Hernandez ",
-      langButton: "🇪🇸 Español"
+      langButton: "🇪🇸 Español",
+      kronecker: "“God made the integers; all else is the work of man.”"
     },
     es: {
       navHome: "Inicio",
@@ -517,12 +542,13 @@
       underRevisionLabel: "En revisión",
       inProgressLabel: "En progreso",
       notesLabel: "Notas de cursos",
-      noteLabel: "Notas"
+      noteLabel: "Notas",
       thesesLabel: "Tesis dirigidas",
       translationsLabel: "Traducciones",
       rpubsLabel: "R Pubs",
       footerCredit: "© 2026 Frank Patrick Murphy Hernandez ",
-      langButton: "🇬🇧 English"
+      langButton: "🇬🇧 English",
+      kronecker: "“Dios hizo los números enteros; el resto es obra del hombre.”"
     }
   };
 
@@ -558,16 +584,16 @@
     document.getElementById('underRevisionLabel').innerText = t.underRevisionLabel;
     document.getElementById('inProgressLabel').innerText = t.inProgressLabel;
     document.getElementById('notesLabel').innerText = t.notesLabel;
-    document.getElementById('notesLabel2').innerText = t.noteLabel; // segunda etiqueta
+    document.getElementById('notesLabel2').innerText = t.noteLabel;
     document.getElementById('thesesLabel').innerText = t.thesesLabel;
     document.getElementById('translationsLabel').innerText = t.translationsLabel;
     document.getElementById('rpubsLabel').innerText = t.rpubsLabel;
     document.getElementById('footerCredit').innerHTML = t.footerCredit;
     document.getElementById('langToggle').innerHTML = t.langButton;
+    document.getElementById('quoteText').innerHTML = t.kronecker;
     currentLang = lang;
   }
 
-  // Alternar idioma
   document.getElementById('langToggle').addEventListener('click', () => {
     if (currentLang === 'en') {
       setLanguage('es');
@@ -576,14 +602,13 @@
     }
   });
 
-  // ===== MANEJO DE SUBMENÚ PARA MÓVILES =====
+  // Submenú móvil
   document.querySelectorAll('.dropdown-submenu > a').forEach(function (element) {
     element.addEventListener('click', function (e) {
       e.preventDefault();
       e.stopPropagation();
       const subMenu = this.nextElementSibling;
       if (subMenu && subMenu.classList.contains('dropdown-menu')) {
-        // Cierra otros submenús abiertos
         document.querySelectorAll('.dropdown-submenu > .dropdown-menu.show').forEach(function (menu) {
           if (menu !== subMenu) menu.classList.remove('show');
         });
@@ -592,7 +617,6 @@
     });
   });
 
-  // Cerrar submenús al hacer clic fuera
   document.addEventListener('click', function (e) {
     if (!e.target.closest('.dropdown-submenu')) {
       document.querySelectorAll('.dropdown-submenu > .dropdown-menu.show').forEach(function (menu) {
@@ -600,6 +624,8 @@
       });
     }
   });
+
+  setLanguage('en');
 </script>
 </body>
 </html>
