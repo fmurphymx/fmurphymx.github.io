@@ -264,11 +264,11 @@
             <small>Convergencia en ℝ²</small>
         </h1>
 
-        <!-- Explicación añadida -->
+        <!-- Explicación -->
         <div class="explanation">
             <strong>📐 ¿Qué simula esta herramienta?</strong><br>
             Visualiza la definición formal de <strong>convergencia de sucesiones en ℝ²</strong>. 
-            Se genera una sucesión de puntos en el plano (que puedes elegir) y se dibuja una <strong>bola de radio ε</strong> alrededor del límite (cuando existe). 
+            Se genera una sucesión de puntos en el plano (elige una de las 7 opciones) y se dibuja una <strong>bola de radio ε</strong> alrededor del límite (cuando existe). 
             Avanzando paso a paso, observarás cómo, para cualquier ε > 0 que elijas, existe un índice N a partir del cual <strong>todos los términos de la sucesión quedan dentro de la bola</strong>. 
             Así se comprende la definición ε‑N de convergencia.
         </div>
@@ -281,11 +281,13 @@
             <div class="control-group">
                 <label>📊 Sucesión</label>
                 <select id="sequenceSelect">
-                    <option value="convergent1">xₙ = (1/n, 1/n²)</option>
-                    <option value="convergent2">xₙ = (1/n, 0)</option>
-                    <option value="convergent3">xₙ = (1/(n+1), 1/(n+1))</option>
-                    <option value="divergent">xₙ = ((-1)ⁿ/n, 1/n)</option>
-                    <option value="cauchy_not_convergent">xₙ = (1 + 1/n, 2 + 1/n) → (1,2)</option>
+                    <option value="convergent1">xₙ = (1/n, 1/n²) → (0,0)</option>
+                    <option value="convergent2">xₙ = (1/n, 0) → (0,0)</option>
+                    <option value="convergent3">xₙ = (1/(n+1), 1/(n+1)) → (0,0)</option>
+                    <option value="convergent_osc">xₙ = ((-1)ⁿ/n, 1/n) → (0,0)</option>
+                    <option value="convergent_slow">xₙ = (1/√n, 1/n) → (0,0)</option>
+                    <option value="convergent_to_400_200">xₙ = (1+1/n, 2−1/n) → (1,2)</option>
+                    <option value="divergent_osc">xₙ = ((-1)ⁿ, 1/n) → no converge</option>
                 </select>
             </div>
             <div class="control-group">
@@ -331,34 +333,42 @@
             let playInterval = null;
             let sequenceType = 'convergent1';
 
-            // --- Definición de sucesiones ---
+            // --- Definición de sucesiones (coordenadas en píxeles) ---
+            // Cada función devuelve {x, y} para el término n (n ≥ 1)
             function getSequence(type, n) {
                 if (n <= 0) return { x: 0, y: 0 };
-                const t = n;
                 switch(type) {
                     case 'convergent1':
-                        return { x: 300 + 180 / t, y: 300 - 120 / (t * t) };
+                        return { x: 300 + 180 / n, y: 300 - 120 / (n * n) };
                     case 'convergent2':
-                        return { x: 300 + 150 / t, y: 300 };
+                        return { x: 300 + 150 / n, y: 300 };
                     case 'convergent3':
-                        return { x: 300 + 160 / (t + 1), y: 300 - 160 / (t + 1) };
-                    case 'divergent':
-                        return { x: 300 + 100 * Math.pow(-1, t) / t, y: 300 + 120 / t };
-                    case 'cauchy_not_convergent':
-                        return { x: 300 + 120 / t, y: 300 - 80 / t };
+                        return { x: 300 + 160 / (n + 1), y: 300 - 160 / (n + 1) };
+                    case 'convergent_osc':
+                        return { x: 300 + 100 * Math.pow(-1, n) / n, y: 300 + 120 / n };
+                    case 'convergent_slow':
+                        return { x: 300 + 200 / Math.sqrt(n), y: 300 - 200 / n };
+                    case 'convergent_to_400_200':
+                        return { x: 400 + 120 / n, y: 200 - 80 / n };
+                    case 'divergent_osc':
+                        return { x: 300 + 100 * Math.pow(-1, n), y: 300 + 120 / n };
                     default:
-                        return { x: 300 + 200 / t, y: 300 - 200 / t };
+                        return { x: 300 + 200 / n, y: 300 - 200 / n };
                 }
             }
 
+            // Límite (en píxeles) o null si no converge
             function getLimit(type) {
                 switch(type) {
                     case 'convergent1':
                     case 'convergent2':
                     case 'convergent3':
-                    case 'cauchy_not_convergent':
+                    case 'convergent_osc':
+                    case 'convergent_slow':
                         return { x: 300, y: 300 };
-                    case 'divergent':
+                    case 'convergent_to_400_200':
+                        return { x: 400, y: 200 };
+                    case 'divergent_osc':
                         return null;
                     default:
                         return { x: 300, y: 300 };
@@ -370,7 +380,7 @@
                 ctx.clearRect(0, 0, W, H);
                 const limit = getLimit(sequenceType);
 
-                // Ejes
+                // Ejes (líneas punteadas)
                 ctx.save();
                 ctx.strokeStyle = '#b0bec5';
                 ctx.lineWidth = 0.8;
@@ -384,7 +394,7 @@
                 ctx.setLineDash([]);
                 ctx.restore();
 
-                // Bola ε
+                // Bola ε (si hay límite)
                 if (limit) {
                     ctx.save();
                     ctx.beginPath();
@@ -398,6 +408,7 @@
                     ctx.setLineDash([]);
                     ctx.restore();
 
+                    // Punto límite
                     ctx.save();
                     ctx.beginPath();
                     ctx.arc(limit.x, limit.y, 7, 0, 2*Math.PI);
@@ -430,7 +441,7 @@
                     ctx.restore();
                 }
 
-                // Puntos de la sucesión
+                // Dibujar puntos de la sucesión
                 const numPoints = Math.min(currentIndex, maxIndex);
                 for (let i = 1; i <= numPoints; i++) {
                     const p = getSequence(sequenceType, i);
@@ -449,6 +460,7 @@
                     }
                     ctx.restore();
 
+                    // Etiqueta del último punto
                     if (i === numPoints && numPoints > 0) {
                         ctx.save();
                         ctx.fillStyle = '#2c3e50';
@@ -460,7 +472,7 @@
                     }
                 }
 
-                // Calcular N
+                // Calcular y mostrar N
                 if (limit) {
                     let N = -1;
                     for (let n = 1; n <= maxIndex; n++) {
@@ -480,6 +492,7 @@
                     ctx.fillText(`N = ${N} (a partir de n ≥ ${N} todos dentro)`, W-15, 15);
                     ctx.restore();
 
+                    // Contar puntos dentro
                     let insideCount = 0;
                     for (let i = 1; i <= numPoints; i++) {
                         const p = getSequence(sequenceType, i);
@@ -497,6 +510,7 @@
                 updateInfoPanel(limit, numPoints);
             }
 
+            // --- Actualizar panel de información ---
             function updateInfoPanel(limit, numPoints) {
                 const panel = document.getElementById('infoPanel');
                 if (!limit) {
@@ -518,19 +532,25 @@
                 const status = allInside ? '✅ Todos los puntos mostrados están dentro de la bola' : 
                                             '⚠️ Algunos puntos aún fuera de la bola';
                 const color = allInside ? '#27ae60' : '#e67e22';
+                let nText = '';
+                if (allInside && numPoints > 0) {
+                    const N = getFirstN(limit);
+                    nText = `✅ Se encontró N = ${N} (a partir de ahí todos dentro)`;
+                } else {
+                    nText = '🔍 Buscando N... (avanza para verlo)';
+                }
                 panel.innerHTML = `
                     <strong>📌 Definición ε-N:</strong> 
                     Para ε = ${epsilon} px, la sucesión ${allInside ? 'ya' : 'aún no'} cumple que 
                     todos los términos a partir de algún N están dentro de la bola.<br>
                     <span style="color:${color}; font-weight:bold;">${status}</span>
                     ${allInside ? ' ¡La definición se cumple!' : ' Sigue avanzando para ver la convergencia.'}
-                    <br><span style="font-size:13px; color:#555;">
-                    ${allInside ? '✅ Se encontró N = ' + getN(limit) : '🔍 Buscando N...'}
-                    </span>
+                    <br><span style="font-size:13px; color:#555;">${nText}</span>
                 `;
             }
 
-            function getN(limit) {
+            // Obtener el primer N tal que todos los siguientes estén dentro
+            function getFirstN(limit) {
                 for (let n = 1; n <= maxIndex; n++) {
                     const p = getSequence(sequenceType, n);
                     if (Math.hypot(p.x - limit.x, p.y - limit.y) < epsilon) {
@@ -602,12 +622,13 @@
 
             document.getElementById('sequenceSelect').addEventListener('change', function() {
                 sequenceType = this.value;
-                resetSequence();
-                if (sequenceType === 'divergent') {
+                // Ajustar maxIndex según la sucesión (para divergente mostramos más términos)
+                if (sequenceType === 'divergent_osc') {
                     maxIndex = 60;
                 } else {
                     maxIndex = 50;
                 }
+                resetSequence();
                 draw();
             });
 
