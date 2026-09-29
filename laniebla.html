@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La Niebla</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    background: #0a0a0c;
+    color: #d8d4cc;
+    min-height: 100vh;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    background-image: radial-gradient(ellipse at center, #1a1a20 0%, #0a0a0c 70%);
+  }
+  .container {
+    max-width: 780px;
+    width: 100%;
+    background: rgba(20, 20, 24, 0.85);
+    border: 1px solid #2a2a30;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 0 60px rgba(180, 180, 200, 0.05);
+  }
+  h1 {
+    font-family: 'Cormorant', Georgia, serif;
+    font-size: 32px;
+    font-weight: 400;
+    letter-spacing: 6px;
+    color: #e8e4dc;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    text-align: center;
+    font-size: 12px;
+    color: #6a6a72;
+    letter-spacing: 3px;
+    margin-bottom: 22px;
+    text-transform: uppercase;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .stat {
+    background: #16161a;
+    border: 1px solid #26262c;
+    border-radius: 8px;
+    padding: 8px 6px;
+    text-align: center;
+  }
+  .stat .lbl { font-size: 10px; color: #6a6a72; letter-spacing: 1.5px; text-transform: uppercase; }
+  .stat .val { font-size: 18px; font-weight: 600; margin-top: 2px; }
+  .stat.salvacion { border-color: #e6a850; box-shadow: 0 0 12px rgba(230,168,80,0.2); }
+  .stat.condena { border-color: #8b3a2a; box-shadow: 0 0 12px rgba(139,58,42,0.25); }
+  .stat .val.pres { color: #f0e6d2; }
+  .stat .val.mem { color: #a8c4d8; }
+  .stat .val.anc { color: #e6a850; }
+  .stat .val.nie { color: #b8b0a8; }
+  .stat .val.kar { color: #c8a8d8; }
+  .stat .val.kar.pos { color: #8fd89f; }
+  .stat .val.kar.neg { color: #e88a7a; }
+
+  .deriva-wrap {
+    background: #16161a;
+    border: 1px solid #26262c;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+  }
+  .deriva-header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 8px;
+    font-size: 12px;
+  }
+  .deriva-band {
+    color: #a8c4d8;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+  .deriva-val { color: #e8e4dc; font-family: monospace; font-size: 14px; }
+  .deriva-bar {
+    position: relative;
+    height: 22px;
+    display: flex;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid #2a2a30;
+  }
+  .band-seg {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 0.5px;
+    position: relative;
+  }
+  .band-seg.b1 { background: #2a1a1a; }
+  .band-seg.b2 { background: #22202a; }
+  .band-seg.b3 { background: #20262c; }
+  .band-seg.b4 { background: #222630; }
+  .band-seg.b5 { background: #262a3a; }
+  .band-seg.active { color: #fff; font-weight: bold; text-shadow: 0 0 6px rgba(255,255,255,0.5); }
+  .band-seg.active::after {
+    content: '';
+    position: absolute; inset: 1px;
+    border: 1px solid rgba(230,168,80,0.6);
+    border-radius: 3px;
+    pointer-events: none;
+  }
+  .band-seg.b1.active { background: #4a1a1a; }
+  .band-seg.b2.active { background: #3a2a3a; }
+  .band-seg.b3.active { background: #2a3a4a; }
+  .band-seg.b4.active { background: #2a3a4a; }
+  .band-seg.b5.active { background: #3a3a5a; }
+
+  .limbo-wrap {
+    background: #2a0a0a;
+    border: 1px solid #5a1a1a;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 14px;
+    text-align: center;
+    display: none;
+  }
+  .limbo-wrap.active { display: block; }
+  .limbo-title {
+    color: #e88a7a; font-size: 11px; letter-spacing: 3px;
+    text-transform: uppercase; margin-bottom: 4px;
+  }
+  .limbo-count {
+    color: #f0e6d2; font-family: monospace; font-size: 24px;
+    letter-spacing: 4px; font-weight: bold;
+  }
+
+  .controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  button {
+    flex: 1;
+    padding: 14px;
+    border: 1px solid #3a3a42;
+    background: #1c1c22;
+    color: #e8e4dc;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 1px;
+  }
+  button:hover:not(:disabled) {
+    background: #26262e;
+    border-color: #5a5a62;
+  }
+  button:active:not(:disabled) { transform: scale(0.98); }
+  button:disabled { opacity: 0.3; cursor: not-allowed; }
+  button.walk:hover:not(:disabled) { border-color: #8fa8b8; color: #a8c4d8; }
+  button.stay:hover:not(:disabled) { border-color: #a89080; color: #d8c0a8; }
+  .extra-controls { display: flex; gap: 8px; margin-bottom: 14px; }
+  .extra-controls button {
+    flex: 1; padding: 8px; font-size: 12px;
+    background: #1a1a20; border-color: #2a2a32;
+  }
+
+  .log {
+    background: #0c0c10;
+    border: 1px solid #202028;
+    border-radius: 8px;
+    padding: 14px 16px;
+    height: 320px;
+    overflow-y: auto;
+    font-size: 14px;
+    line-height: 1.7;
+    font-family: 'Cormorant', Georgia, serif;
+  }
+  .log::-webkit-scrollbar { width: 6px; }
+  .log::-webkit-scrollbar-track { background: transparent; }
+  .log::-webkit-scrollbar-thumb { background: #2a2a32; border-radius: 3px; }
+  .log .entry { margin-bottom: 8px; opacity: 0; animation: fadeIn 0.4s forwards; }
+  @keyframes fadeIn { to { opacity: 1; } }
+  .log .entry.sys { color: #8fa8b8; font-style: italic; }
+  .log .entry.walk { color: #a8c4d8; }
+  .log .entry.stay { color: #d8c0a8; }
+  .log .entry.enc { color: #e6a850; font-weight: 600; font-size: 15px; margin-top: 12px; }
+  .log .entry.dial { color: #d8d4cc; font-style: italic; padding-left: 12px; border-left: 2px solid #2a2a32; }
+  .log .entry.q { color: #f0e6d2; font-weight: 500; margin-top: 6px; }
+  .log .entry.opt { color: #a8c4d8; padding-left: 12px; }
+  .log .entry.opt.neg { color: #d88a7a; }
+  .log .entry.kar-pos { color: #8fd89f; }
+  .log .entry.kar-neg { color: #e88a7a; }
+  .log .entry.niebla { color: #b8b0a8; font-size: 13px; }
+  .log .entry.danger { color: #e88a7a; font-weight: 600; }
+  .log .entry.good { color: #8fd89f; }
+  .log .entry.final {
+    color: #e8e4dc; font-size: 15px; line-height: 1.8;
+    padding: 14px; background: #16161a; border-left: 3px solid #e6a850;
+    border-radius: 4px; margin-top: 10px;
+  }
+  .log .entry.final.limbo { border-left-color: #5a1a1a; color: #b0a8a0; }
+  .log .entry.final.retorno { border-left-color: #8b3a2a; }
+
+  /* Modal de origen */
+  .overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.92);
+    display: none; justify-content: center; align-items: center;
+    z-index: 100; padding: 20px;
+  }
+  .overlay.active { display: flex; }
+  .overlay-box {
+    background: #16161a;
+    border: 1px solid #3a3a42;
+    border-radius: 14px;
+    padding: 30px;
+    max-width: 560px;
+    width: 100%;
+  }
+  .overlay-box h2 {
+    font-family: 'Cormorant', Georgia, serif;
+    font-size: 22px;
+    font-weight: 400;
+    color: #e8e4dc;
+    letter-spacing: 3px;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .overlay-box .intro {
+    text-align: center;
+    color: #8a8a92;
+    font-size: 13px;
+    margin-bottom: 22px;
+    font-style: italic;
+  }
+  .origin-btn {
+    display: block; width: 100%;
+    text-align: left;
+    padding: 16px 20px;
+    margin-bottom: 10px;
+    background: #1c1c22;
+    border: 1px solid #2a2a32;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: #d8d4cc;
+    font-family: inherit;
+  }
+  .origin-btn:hover {
+    background: #22222a;
+    border-color: #4a4a52;
+  }
+  .origin-btn .oname {
+    font-size: 16px; font-weight: 600;
+    color: #e8e4dc; letter-spacing: 1px;
+    margin-bottom: 6px;
+    display: block;
+  }
+  .origin-btn .odesc {
+    font-size: 12px; color: #9a9aa2; line-height: 1.5;
+    margin-bottom: 6px;
+  }
+  .origin-btn .opow { color: #8fd89f; font-size: 12px; display: block; margin-bottom: 2px; }
+  .origin-btn .omal { color: #e88a7a; font-size: 12px; display: block; }
+
+  /* Encuentro */
+  .enc-box {
+    background: #16161a;
+    border: 1px solid #3a3a42;
+    border-radius: 12px;
+    padding: 24px;
+    max-width: 600px;
+    width: 100%;
+  }
+  .enc-name {
+    font-family: 'Cormorant', Georgia, serif;
+    font-size: 22px; color: #e6a850;
+    letter-spacing: 2px; text-align: center;
+    margin-bottom: 16px;
+  }
+  .enc-dial {
+    font-style: italic;
+    color: #c8c4bc;
+    font-size: 15px;
+    line-height: 1.7;
+    padding: 12px 16px;
+    border-left: 2px solid #3a3a42;
+    background: #101014;
+    border-radius: 4px;
+    margin-bottom: 18px;
+  }
+  .enc-q {
+    color: #f0e6d2;
+    font-size: 15px;
+    margin-bottom: 16px;
+    font-weight: 500;
+  }
+  .enc-opt {
+    display: block; width: 100%;
+    text-align: left;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    background: #1c1c22;
+    border: 1px solid #2a2a32;
+    border-radius: 6px;
+    color: #d8d4cc;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.5;
+    transition: all 0.15s;
+  }
+  .enc-opt:hover {
+    background: #26262e;
+    border-color: #5a5a62;
+  }
+
+  @media (max-width: 600px) {
+    .stats { grid-template-columns: repeat(3, 1fr); }
+    .container { padding: 16px; }
+    h1 { font-size: 24px; letter-spacing: 4px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>LA NIEBLA</h1>
+  <div class="subtitle">Un viaje por el Vacío</div>
+
+  <div class="stats" id="stats">
+    <div class="stat" id="statPres"><div class="lbl">Presencia</div><div class="val pres" id="valPres">6</div></div>
+    <div class="stat" id="statMem"><div class="lbl">Memoria</div><div class="val mem" id="valMem">0</div></div>
+    <div class="stat" id="statAnc"><div class="lbl">Anclas</div><div class="val anc" id="valAnc">1</div></div>
+    <div class="stat" id="statNie"><div class="lbl">Niebla</div><div class="val nie" id="valNie">0</div></div>
+    <div class="stat" id="statKar"><div class="lbl">Karma</div><div class="val kar" id="valKar">0</div></div>
+  </div>
+
+  <div class="deriva-wrap">
+    <div class="deriva-header">
+      <span class="deriva-band" id="derivaBandName">Zona Neutra — Infancia / Juventud</span>
+      <span class="deriva-val" id="derivaVal">0</span>
+    </div>
+    <div class="deriva-bar">
+      <div class="band-seg b1" id="seg1">QUIETUD ABSOLUTA</div>
+      <div class="band-seg b2" id="seg2">QUIETUD</div>
+      <div class="band-seg b3" id="seg3">NEUTRA</div>
+      <div class="band-seg b4" id="seg4">MOVIMIENTO</div>
+      <div class="band-seg b5" id="seg5">DERIVA PROFUNDA</div>
+    </div>
+  </div>
+
+  <div class="limbo-wrap" id="limboWrap">
+    <div class="limbo-title">Cuenta del Limbo</div>
+    <div class="limbo-count" id="limboCount">10</div>
+  </div>
+
+  <div class="controls" id="controls">
+    <button class="walk" id="btnWalk" onclick="decidir('caminar')">🚶 Caminar</button>
+    <button class="stay" id="btnStay" onclick="decidir('quedarse')">🧍 Quedarse</button>
+  </div>
+
+  <div class="extra-controls" id="extraControls">
+    <button id="btnExtra1" style="display:none;" onclick="usarHabilidadOrigen()"></button>
+    <button id="btnReiniciar" style="display:none;" onclick="reiniciarCiclo()">🔄 Nuevo Ciclo</button>
+  </div>
+
+  <div class="log" id="log"></div>
+</div>
+
+<!-- Modal de Origen -->
+<div class="overlay active" id="overlayOrigen">
+  <div class="overlay-box">
+    <h2>EL RITO DEL ORIGEN</h2>
+    <p class="intro">Abres los ojos en la niebla. Recuerdas quién fuiste.</p>
+    <button class="origin-btn" onclick="elegirOrigen('soldado')">
+      <span class="oname">⚔️ El Soldado</span>
+      <span class="odesc">Un hombre o mujer de mil batallas. Sobreviviste a todo.</span>
+      <span class="opow">+ Poder: +2 Presencia (empiezas con 8). Sabes aguantar.</span>
+      <span class="omal">− Maldición: cada vez que eliges el camino frío, la Niebla sube +1 extra.</span>
+    </button>
+    <button class="origin-btn" onclick="elegirOrigen('enano')">
+      <span class="oname">⚒️ El Enano Herrero</span>
+      <span class="odesc">Famoso por forjar mithril. Tus manos crearon cosas hermosas.</span>
+      <span class="opow">+ Poder: una vez por ciclo, forjar un Ancla (2 Memoria → 1 Ancla).</span>
+      <span class="omal">− Maldición: empiezas con Niebla en 2. La niebla te reconoce.</span>
+    </button>
+    <button class="origin-btn" onclick="elegirOrigen('elfo')">
+      <span class="oname">🧝 El Elfo Mago</span>
+      <span class="odesc">Alto, antiguo, dominabas los elementos.</span>
+      <span class="opow">+ Poder: una vez por ciclo, Escuchar la Niebla (ver próxima tirada).</span>
+      <span class="omal">− Maldición: la magia cuesta. Cada vez que Escuchas, pierdes 1 Presencia.</span>
+    </button>
+  </div>
+</div>
+
+<!-- Modal de Encuentro -->
+<div class="overlay" id="overlayEnc">
+  <div class="enc-box">
+    <div class="enc-name" id="encName"></div>
+    <div class="enc-dial" id="encDial"></div>
+    <div class="enc-q" id="encQ"></div>
+    <div id="encOpts"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   DATOS: LOS 30 ENCUENTROS
+   ============================================================ */
+const ENCUENTROS = {
+  1: [
+    { id:'1-1', nombre:'Tu Esposa Moribunda',
+      camina:'Te ve llegar desde la cama. "¿Por qué caminas ahora? Toda la vida te quedaste quieto. Y ahora que me muero, te mueves. Qué ironía."',
+      quieto:'Aquí estás. Como siempre. A mi lado. Callado. No sé si es amor o costumbre. Pero te agradezco.',
+      pregunta:'¿Alguna vez deseaste haberme dejado?',
+      opciones:[
+        { texto:'Nunca. Fuiste mi única vida.', karma:1 },
+        { texto:'A veces. Pero me quedé.', karma:-1 }
+      ]},
+    { id:'1-2', nombre:'Tus Hijos que se Fueron',
+      camina:'Nos dejaste. No como nosotros a ti, sino al revés. Tú te quedaste, nosotros volamos. Y ahora volvemos, y ya no estás.',
+      quieto:'Nos criaste. Nos viste ir. Nunca nos pediste que volviéramos. Y nunca volvimos.',
+      pregunta:'¿Nos perdonas por habernos ido?',
+      opciones:[
+        { texto:'Siempre. La vida es de los que se van.', karma:1 },
+        { texto:'No. Me dejaron solo.', karma:-1 }
+      ]},
+    { id:'1-3', nombre:'El Sacerdote de la Extremaunción',
+      camina:'Te vi caminar hacia mí. Cojeando. Como si aún buscaras algo. Pero ya no hay nada que buscar, hijo.',
+      quieto:'Aquí estás. En la misma banca donde te bauticé. Donde te casé. Donde enterré a tu esposa. Y ahora te entierro a ti.',
+      pregunta:'¿Estás en paz con Dios?',
+      opciones:[
+        { texto:'Sí. Hice lo que pude.', karma:1 },
+        { texto:'No. Nunca creí del todo.', karma:-1 }
+      ]},
+    { id:'1-4', nombre:'El Sepulturero',
+      camina:'Te veo llegar. Es raro. Normalmente la gente llega en caja. Tú llegas a pie. Como si vinieras a ver el trabajo terminado.',
+      quieto:'Esta es tu tumba. Al lado de la de ella. Como pediste. No fue difícil cavarla. La tierra aquí es blanda. Blanda como toda esta vida.',
+      pregunta:'¿Quieres que te entierre con algo?',
+      opciones:[
+        { texto:'Con nada. Me voy como vine.', karma:1 },
+        { texto:'Con todo. Que me recuerden.', karma:-1 }
+      ]},
+    { id:'1-5', nombre:'La Casa Vacía',
+      camina:'Nunca caminaste lejos de mí. Pero ahora que lo haces, te extraño. Aunque nunca me hablaste. Aunque nunca me miraste.',
+      quieto:'Aquí envejeciste. Aquí lloraste. Aquí reíste una vez, creo recordar. Aquí morirás. Y yo seguiré aquí.',
+      pregunta:'¿Alguna vez me consideraste un hogar?',
+      opciones:[
+        { texto:'Siempre. Eras mi refugio.', karma:1 },
+        { texto:'Eras solo paredes.', karma:-1 }
+      ]},
+    { id:'1-6', nombre:'Tu Propio Reflejo',
+      camina:'Mírate. Caminaste toda la vida... y terminaste aquí. Solo. Viejo. Sin nadie. ¿Valió la pena?',
+      quieto:'Mírate. Te quedaste toda la vida... y terminaste aquí. Solo. Viejo. Sin nadie. ¿Valió la pena?',
+      pregunta:'¿Volverías a vivir la misma vida?',
+      opciones:[
+        { texto:'Sí. Fue mi vida. La acepto.', karma:1 },
+        { texto:'No. No valió la pena.', karma:-1 }
+      ]}
+  ],
+  2: [
+    { id:'2-1', nombre:'La Esposa Joven',
+      camina:'Llegaste tarde a nuestra boda. Como siempre. Pero llegaste. Y eso bastó.',
+      quieto:'Estabas quieto en el altar. Como siempre. Y yo te miré y supe que sería así toda la vida. Y no me importó.',
+      pregunta:'¿Alguna vez te arrepentiste de haberme elegido?',
+      opciones:[
+        { texto:'Nunca. Fuiste mi destino.', karma:1 },
+        { texto:'A veces. Pero me quedé.', karma:-1 }
+      ]},
+    { id:'2-2', nombre:'La Esposa Embarazada',
+      camina:'Estabas fuera cuando nació. Trabajando. Como siempre. Llegaste tres días después. Con las manos vacías y los ojos llenos.',
+      quieto:'Estabas aquí. En la puerta. Sin moverte. Viéndome parir. Sin decir nada. Pero estabas.',
+      pregunta:'¿Sentiste miedo de ser padre?',
+      opciones:[
+        { texto:'Sí. Pero me quedé.', karma:1 },
+        { texto:'No. Era mi deber.', karma:-1 }
+      ]},
+    { id:'2-3', nombre:'La Esposa Cansada',
+      camina:'Volviste del trabajo. Cansado. Yo también. Nos miramos. No dijimos nada. Y nos dormimos. Así fue durante veinte años.',
+      quieto:'Nunca te fuiste. Yo nunca me fui. Y sin embargo, estábamos solos. Juntos, pero solos. ¿Lo notaste alguna vez?',
+      pregunta:'¿Alguna vez me viste de verdad?',
+      opciones:[
+        { texto:'Siempre. Incluso cuando callaba.', karma:1 },
+        { texto:'No. Estaba ocupado sobreviviendo.', karma:-1 }
+      ]},
+    { id:'2-4', nombre:'La Esposa Enferma',
+      camina:'Cuando me enfermé, no estabas. Estabas trabajando. Como siempre. Volviste cuando ya no había nada que hacer.',
+      quieto:'Cuando me enfermé, te quedaste. Sin moverte. Sin hablar. Día tras día. Nunca me soltaste la mano.',
+      pregunta:'¿Alguna vez pensaste en dejarme?',
+      opciones:[
+        { texto:'Nunca. Habría muerto contigo.', karma:1 },
+        { texto:'A veces. Pero no me fui.', karma:-1 }
+      ]},
+    { id:'2-5', nombre:'La Esposa Anciana',
+      camina:'Mira nuestras manos. Arrugadas. Nunca tocaron el mundo. Solo se tocaron entre sí. Una y otra vez. Toda la vida.',
+      quieto:'Mira nuestras manos. Nunca tocaron a nadie más. Solo a nosotros. ¿Fue suficiente? ¿O solo fue lo único que conocimos?',
+      pregunta:'¿Volverías a casarte conmigo?',
+      opciones:[
+        { texto:'Mil veces. En mil vidas.', karma:1 },
+        { texto:'No lo sé. Ya no sé nada.', karma:-1 }
+      ]},
+    { id:'2-6', nombre:'La Esposa Muerta',
+      camina:'Me enterraste. Y luego seguiste caminando. Sin mí. Como si nada.',
+      quieto:'Me enterraste. Y luego te sentaste a mi lado. Y te quedaste. Y sigues aquí. Conmigo. Aunque ya no estoy.',
+      pregunta:'¿Alguna vez me olvidaste?',
+      opciones:[
+        { texto:'Nunca. Eres mi único recuerdo.', karma:1 },
+        { texto:'Sí. La vida sigue.', karma:-1 }
+      ]}
+  ],
+  3: [
+    { id:'3-1', nombre:'Tu Padre',
+      camina:'Veo que sigues andando. Como siempre. Nunca supiste quedarte quieto, ni de niño.',
+      quieto:'Por fin. Cuántos años esperé verte quieto. Siempre corrías. Siempre huías. Y yo nunca supe de qué.',
+      pregunta:'¿Alguna vez te detuviste a pensar en quienes dejabas atrás?',
+      opciones:[
+        { texto:'Sí. Pero no supe cómo volver.', karma:1 },
+        { texto:'No. Tenía que seguir.', karma:-1 }
+      ]},
+    { id:'3-2', nombre:'Tu Madre',
+      camina:'Hijo. Siempre fuiste un torbellino. Me dolía el pecho cada vez que te ibas. Pero nunca te lo dije.',
+      quieto:'Qué quieto estás ahora. Cuánto tiempo deseé esto. Verte quieto. Verte mío. Aunque sea en la niebla.',
+      pregunta:'¿Alguna vez pensaste en mí cuando estabas lejos?',
+      opciones:[
+        { texto:'Todos los días. Eras mi brújula.', karma:1 },
+        { texto:'No. La distancia me hacía olvidar.', karma:-1 }
+      ]},
+    { id:'3-3', nombre:'Tu Amigo de la Infancia',
+      camina:'¿Te acuerdas de cuando corríamos por el campo? Nunca dejaste de correr. Ni cuando ya no había campo.',
+      quieto:'Mira dónde terminamos. Tú quieto, yo quieto. Como cuando éramos niños y nos escondíamos. Solo que ahora no hay granero.',
+      pregunta:'¿Alguna vez extrañaste nuestra infancia?',
+      opciones:[
+        { texto:'Cada día. Fue lo mejor que tuve.', karma:1 },
+        { texto:'La dejé atrás. No se puede vivir en el pasado.', karma:-1 }
+      ]},
+    { id:'3-4', nombre:'Tu Profesor',
+      camina:'Veo que sigues buscando. Como cuando te enseñaba. Nunca te conformabas. Eso me gustaba de ti.',
+      quieto:'Detente. Por fin. ¿Cuánto aprendiste en tu vida? ¿Cuánto olvidaste? ¿Cuánto decidiste no saber?',
+      pregunta:'¿Aprendiste algo de lo que te enseñé?',
+      opciones:[
+        { texto:'Aprendí a dudar de mí mismo. Gracias.', karma:1 },
+        { texto:'Aprendí a superarte. Ya no te necesito.', karma:-1 }
+      ]},
+    { id:'3-5', nombre:'El Sacerdote del Pueblo',
+      camina:'Sigues andando, hijo. ¿Buscas a Dios en el camino? ¿O huyes de Él?',
+      quieto:'Qué quieto estás. Como en misa, cuando eras niño. Te aburrías, pero te quedabas. Por respeto. O por miedo.',
+      pregunta:'¿Alguna vez rezaste con el corazón?',
+      opciones:[
+        { texto:'Sí. Cuando tenía miedo, rezaba por otros.', karma:1 },
+        { texto:'No. Nunca creí en nada.', karma:-1 }
+      ]},
+    { id:'3-6', nombre:'Un Desconocido',
+      camina:'No me conoces. Pero yo te conozco. Te he visto pasar toda tu vida. Siempre corriendo. Siempre llegando tarde.',
+      quieto:'No me conoces. Pero yo te conozco. Te he visto detenerte por fin. Y en el silencio, te he visto mirarte por dentro.',
+      pregunta:'¿Quién eres cuando nadie te mira?',
+      opciones:[
+        { texto:'Alguien que intenta ser mejor.', karma:1 },
+        { texto:'Alguien a quien no le importa nada.', karma:-1 }
+      ]}
+  ],
+  4: [
+    { id:'4-1', nombre:'Tu Esposa',
+      camina:'Te veo llegar de lejos. Siempre te vi llegar de lejos, incluso cuando estabas cerca.',
+      quieto:'Qué raro verte quieto. Toda la vida te esperé quieto. Y ahora que lo estás, ya no sé qué decirte.',
+      pregunta:'¿Sabes cuántas noches me dormí esperándote?',
+      opciones:[
+        { texto:'Lo siento. Debí haber estado.', karma:1 },
+        { texto:'Alguien tenía que traer el pan.', karma:-1 }
+      ]},
+    { id:'4-2', nombre:'Tus Padres Ancianos',
+      camina:'Nos dejaste. No te culpamos. Los jóvenes tienen que volar. Pero cada invierno contábamos los días.',
+      quieto:'Te quedaste. Nos cuidaste. No como un hijo, sino como un guardián. No sabes cuánto lo agradecimos.',
+      pregunta:'¿Pensaste en nosotros cuando no estabas?',
+      opciones:[
+        { texto:'Cada invierno. Cada carta que no envié.', karma:1 },
+        { texto:'No. La distancia era mi libertad.', karma:-1 }
+      ]},
+    { id:'4-3', nombre:'Tus Hijos de Niño',
+      camina:'Nos dejaste pequeños. No te juzgamos. Aprendimos a ser fuertes. Pero aprendimos solos.',
+      quieto:'Nos criaste tú mismo. Nos enseñaste a caminar, a leer, a no tener miedo. Pero tú nunca caminaste.',
+      pregunta:'¿Nos recordaste mientras crecíamos?',
+      opciones:[
+        { texto:'Los llevé en mi pecho cada día.', karma:1 },
+        { texto:'Trabajaba por ustedes. Eso bastaba.', karma:-1 }
+      ]},
+    { id:'4-4', nombre:'Una Novia de Otro Pueblo',
+      camina:'Te conocí una vez. Una sola vez. Me prometiste volver. Nunca volviste.',
+      quieto:'Nunca me conociste. Pero yo te vi pasar una vez, de lejos. Y pensé: "Ese hombre tiene raíces profundas".',
+      pregunta:'¿Por qué no volviste?',
+      opciones:[
+        { texto:'Porque no merecía volver. Perdóname.', karma:1 },
+        { texto:'Porque encontré algo mejor.', karma:-1 }
+      ]},
+    { id:'4-5', nombre:'Tu Compañero de Fatigas',
+      camina:'Caminamos juntos mucho tiempo. Hasta que elegiste otro camino. No te culpo. Pero te extrañé.',
+      quieto:'Nunca me fui. Tú tampoco. Trabajamos juntos toda la vida. No sé si fue amistad o costumbre.',
+      pregunta:'¿Alguna vez pensaste en volver por mí?',
+      opciones:[
+        { texto:'Todos los días. Pero el orgullo me pudo.', karma:1 },
+        { texto:'No. Cada quien su camino.', karma:-1 }
+      ]},
+    { id:'4-6', nombre:'Tu Rival',
+      camina:'Me superaste. En todo. En riqueza, en familia, en nombre. Y ahora estás aquí, igual que yo.',
+      quieto:'Nos odiamos toda la vida. Tú aquí, yo allá. Nunca nos enfrentamos. Y ahora, sin nada que ganar, no sé por qué te odiaba.',
+      pregunta:'¿Alguna vez pensaste en mí con respeto?',
+      opciones:[
+        { texto:'Siempre. Fuiste mi espejo.', karma:1 },
+        { texto:'No. Solo pensaba en ganarte.', karma:-1 }
+      ]}
+  ],
+  5: [
+    { id:'5-1', nombre:'Tu Hijo/a que Dejaste de Ver',
+      camina:'Te vi irte. De pequeño, te vi irte. Y luego yo me fui. Y nunca volví. Y tú nunca volviste.',
+      quieto:'Me dejaste. Sin despedirte. Sin mirar atrás. Y yo me quedé esperando. Toda la vida.',
+      pregunta:'¿Alguna vez pensaste en mí?',
+      opciones:[
+        { texto:'Todos los días. Pero no supe volver.', karma:1 },
+        { texto:'No. La vida me llevó.', karma:-1 }
+      ]},
+    { id:'5-2', nombre:'Tu Nieto/a que Nunca Conociste',
+      camina:'Nunca me conociste. Y yo nunca te conocí. Pero sé tu nombre. Lo repetía tu padre en sus cartas.',
+      quieto:'Nunca me conociste. Pero yo te vi una vez. En una foto. Y supe que existías.',
+      pregunta:'¿Te hubiera gustado conocerme?',
+      opciones:[
+        { texto:'Sí. Habrías sido mi tesoro.', karma:1 },
+        { texto:'No. No me perdí nada.', karma:-1 }
+      ]},
+    { id:'5-3', nombre:'La Mujer que Amaste y no Elegiste',
+      camina:'Me dejaste por otra. Y luego por otra. Y luego por nadie. Y ahora estás aquí. Solo.',
+      quieto:'Me dejaste por lo que ya tenías. Y nunca volviste. Pero yo te esperé. Toda la vida.',
+      pregunta:'¿Alguna vez te arrepentiste?',
+      opciones:[
+        { texto:'Todos los días. Pero no supe volver.', karma:1 },
+        { texto:'No. Elegí bien.', karma:-1 }
+      ]},
+    { id:'5-4', nombre:'El Amigo que Hiciste en el Camino',
+      camina:'Caminamos juntos un tramo. Luego te fuiste. Como todos. Pero nunca te olvidé.',
+      quieto:'Nunca caminamos juntos. Tú ibas y venías. Yo esperaba. Y cada vez que volvías, era como si nunca te hubieras ido.',
+      pregunta:'¿Alguna vez me consideraste tu amigo?',
+      opciones:[
+        { texto:'Siempre. Fuiste mi hermano.', karma:1 },
+        { texto:'Eras solo un conocido.', karma:-1 }
+      ]},
+    { id:'5-5', nombre:'El Enemigo que se Volvió Hermano',
+      camina:'Nos odiamos. Nos golpeamos. Nos traicionamos. Y al final, nos salvamos.',
+      quieto:'Nunca te odié. Nunca me odiaste. Solo nos ignoramos. Toda la vida. Y eso fue peor que el odio.',
+      pregunta:'¿Alguna vez me perdonaste?',
+      opciones:[
+        { texto:'Sí. Y me perdoné a mí mismo.', karma:1 },
+        { texto:'No. Me llevé el rencor a la tumba.', karma:-1 }
+      ]},
+    { id:'5-6', nombre:'El Desconocido que te Cuidó al Final',
+      camina:'No me conoces. Pero te cuidé. Porque no tenías a nadie. Y yo tampoco.',
+      quieto:'No me conoces. Pero te vi morir. Solo. Viejo. Y no hice nada.',
+      pregunta:'¿Alguna vez agradeciste a alguien sin motivo?',
+      opciones:[
+        { texto:'Sí. A ti. Ahora.', karma:1 },
+        { texto:'No. Nunca me hizo falta.', karma:-1 }
+      ]}
+  ]
+};
+
+const BANDAS = {
+  1: { nombre:'Vejez Pasiva', rango:'−10 a −6', etapa:'Vejez' },
+  2: { nombre:'Adultez Pasiva', rango:'−5 a −3', etapa:'Adultez' },
+  3: { nombre:'Infancia / Juventud', rango:'−2 a +2', etapa:'Infancia' },
+  4: { nombre:'Adultez Activa', rango:'+3 a +5', etapa:'Adultez' },
+  5: { nombre:'Vejez Activa', rango:'+6 a +10', etapa:'Vejez' }
+};
+
+/* ============================================================
+   FINALES
+   ============================================================ */
+const FINALES = {
+  // Soldado
+  'soldado-activo-salvacion': {
+    titulo:'El Descanso del Guerrero',
+    texto:'Caminaste. Toda tu vida caminaste. Hacia adelante, hacia el peligro, hacia el deber. No buscabas gloria. Nunca la buscaste. Pero cada batalla que libraste fue para que otros pudieran dormir. Conociste a muchos. Amaste a algunos. Perdiste a varios. Y aun así, nunca dejaste de moverte.\n\nAhora las armas callan. La niebla se abre por primera vez, como si te reconociera. Y al otro lado ves un campo verde, sin humo, sin sangre, sin cuervos. Huele a lluvia reciente. Huele a casa.\n\nNadie te recibe con fanfarrias. Nadie grita tu nombre. Pero hay una silla junto al fuego, y está vacía, y es tuya.'
+  },
+  'soldado-activo-retorno': {
+    titulo:'El Eterno Retorno',
+    texto:'Caminaste. Pero caminaste por ti. Por tu nombre grabado en piedra, por el eco de tu fama, por el miedo a que el mundo te olvidara antes de que tú lo olvidaras a él. Conociste a muchos. Pero a ninguno lo viste de verdad.\n\nEl Reflejo te mira desde el Centro. No con odio. Con cansancio. Como un espejo que ya se aburrió de reflejarte.\n\n"No estás listo. Vuelve. Respira. Y quizás, en otra vida, aprendas que la paz no se conquista: se merece."'
+  },
+  'soldado-pasivo-salvacion': {
+    titulo:'El Cielo del Pacificador',
+    texto:'No fuiste el más fuerte. Nunca lo fuiste. Pero supiste detenerte. Dejaste las armas antes de que ellas te dejaran a ti. Entendiste, antes que nadie, que la guerra no termina con una victoria: termina con una renuncia. Y tú renunciaste. No por cobardía. Por sabiduría.\n\nConociste a pocos. Pero a esos pocos los conociste de verdad. Los viste envejecer. Los viste morir. Les cerraste los ojos. Y cuando llegó tu turno, ya no tenías miedo.\n\nLa niebla se disuelve. No hay campo verde. Hay una habitación pequeña, con una ventana, y una taza de té humeando.'
+  },
+  'soldado-pasivo-retorno': {
+    titulo:'La Niebla del Cobarde',
+    texto:'No luchaste. No por miedo. Por indiferencia. Dejaste que otros lucharan por ti. Dejaste que otros murieran por ti. Y cuando te tocó, te escondiste. No en la batalla, sino en la vida misma.\n\nLa niebla te reclama. No como castigo. Como consecuencia. Porque el que no elige su camino, la niebla lo elige por él.\n\nEl Reflejo no te habla. Ni siquiera te mira. Solo levanta una mano y señala atrás. Al principio.'
+  },
+  // Enano
+  'enano-activo-salvacion': {
+    titulo:'La Forja Eterna',
+    texto:'Forjaste. Toda tu vida forjaste. Pero no para tu nombre. Para las manos de otros. Cada espada que salió de tu yunque protegió una vida. Cada anillo guardó una promesa. Cada herramienta fue un acto de amor disfrazado de trabajo.\n\nCaminaste. Viste montañas. Viste mares. Viste pueblos que ya no existen y personas que ya no respiran. Y en cada uno dejaste algo forjado. No para que te recordaran. Para que vivieran mejor.\n\nAhora llegas al Centro. Y el Centro no es un lugar: es un taller. Con fuego encendido, yunque tibio, y metal esperando. Alguien te ha estado esperando. No un dios. Un aprendiz. Alguien a quien le enseñarás lo que sabes.'
+  },
+  'enano-activo-retorno': {
+    titulo:'El Yunque Roto',
+    texto:'Forjaste. Pero forjaste para tu fama. Tu nombre grabado en cada pieza, tu marca en cada hoja, tu orgullo en cada yunque. Buscabas que el mundo te recordara, no que el mundo fuera mejor.\n\nCaminaste mucho. Pero siempre volvías al mismo sitio: a ti mismo. Y tú, al final, eras un sitio pequeño. Un taller sin ventanas. Un fuego que solo calentaba a su dueño.\n\nEl metal no te recuerda. El fuego no te llora. El yunque está frío.'
+  },
+  'enano-pasivo-salvacion': {
+    titulo:'El Metal en Reposo',
+    texto:'Dejaste el martillo. No por cobardía. Por sabiduría. Entendiste que no todo se forja con fuego. Que el metal, a veces, solo necesita descansar. Y tú también.\n\nConociste a pocos. Pero a esos pocos los cuidaste como cuidas el metal: con paciencia, con calor justo, con la presión exacta. No los deformaste. Los acompañaste.\n\nLa forja se apaga. El taller se cierra. Y por primera vez, el silencio no te pesa. El silencio te abraza.'
+  },
+  'enano-pasivo-retorno': {
+    titulo:'La Escoria',
+    texto:'Tuviste el don. Tuviste el fuego. Tuviste el yunque. Tuviste todo lo que un enano puede desear. Y no hiciste nada con ello. Te quedaste quieto, no por paz, sino por pereza. Por miedo al error. Por miedo a que tu obra no fuera perfecta.\n\nNo forjaste. No enseñaste. No amaste. Solo exististe. Y existir no es vivir.\n\nLa escoria se desecha. No por maldad. Por olvido. Porque el que no usa lo que tiene, lo pierde. Y tú lo perdiste todo antes de morir.'
+  },
+  // Elfo
+  'elfo-activo-salvacion': {
+    titulo:'La Última Estrella',
+    texto:'Usaste la magia para proteger. Para curar. Para iluminar caminos que otros no podían ver. Cada hechizo fue un acto de amor. Cada conjuro, una caricia al mundo. Caminaste siglos. Viste imperios caer y aldeas renacer.\n\nConociste a miles. Amaste a decenas. Perdiste a casi todos. Pero nunca dejaste de brillar. No por vanidad. Por deber. Porque alguien tenía que sostener el cielo mientras los demás dormían.\n\nAhora asciendes. No como un dios. Como una estrella que guía. Y en el cielo, alguien te mira y sonríe sin saber por qué.'
+  },
+  'elfo-activo-retorno': {
+    titulo:'El Vacío Hambriento',
+    texto:'Buscaste poder. Poder sobre otros. Poder sobre el mundo. Poder sobre la muerte misma. Caminaste por todos los caminos, no para conocerlos, sino para conquistarlos. Y cada paso que diste dejó una sombra más larga.\n\nEl Vacío te reconoce como suyo. Te consume. No como castigo. Como espejo. Porque el que todo lo quiere, todo lo pierde.\n\nEl Reflejo no te juzga. Te abraza. Y en ese abrazo, te disuelves.'
+  },
+  'elfo-pasivo-salvacion': {
+    titulo:'El Árbol que Escucha',
+    texto:'No hiciste magia. Escuchaste. Aprendiste que el poder más grande es la paciencia. Que la sabiduría no se conjura: se cultiva.\n\nConociste a pocos. Pero cada uno te dejó una semilla. Y tú las plantaste. Y las regaste. Y esperaste. Durante siglos. Sin prisa. Sin miedo.\n\nAhora eres parte del mundo. No lo dominas. Lo acompañas. Y el bosque te recuerda como el que supo callar.'
+  },
+  'elfo-pasivo-retorno': {
+    titulo:'La Hoja Seca',
+    texto:'Tuviste el don. Tuviste el tiempo. Tuviste la eternidad entera para hacer algo hermoso. Y no hiciste nada. Te quedaste quieto, no por paz, sino por miedo. Por miedo a equivocarte. Por miedo a que tu magia no fuera perfecta.\n\nLa hoja seca cae del árbol. No por el viento. Por su propio peso. Porque el que no elige su destino, el destino lo elige por él. Y tú no elegiste nada. Nunca. Ni siquiera al final.'
+  }
+};
+
+const DISOLUCION = {
+  soldado: {
+    disuelto:'El guerrero murió de pie, como vivió. La niebla lo tragó sin ceremonia. No hubo batalla final. Solo el silencio de un campo sin enemigos.',
+    apagado:'El guerrero se rindió. No por cobardía, por cansancio. Cerró los ojos y dejó de luchar. Y por primera vez en su vida, no soñó con sangre.',
+    absorbido:'Se quedó quieto. Y la quietud lo tomó por suyo. La niebla no distinguió su cuerpo de ella misma. Y así, sin ruido, dejó de ser.'
+  },
+  enano: {
+    disuelto:'El yunque queda frío. El fuego, apagado. El metal, sin forjar. Y nadie sabe por qué el taller huele a ceniza sin dueño.',
+    apagado:'El fuego se apagó. El metal espera. El herrero no volverá. Y el mundo, sin saberlo, perdió una mano que sabía crear.',
+    absorbido:'Se fundió con la niebla. Como el metal con la escoria. No hubo golpe final. Solo el lento enfriamiento de un cuerpo que ya no recordaba serlo.'
+  },
+  elfo: {
+    disuelto:'La última luz se apaga. Y el bosque llora sin saber qué perdió. Porque los árboles recuerdan a quien los iluminó, aunque no sepan su nombre.',
+    apagado:'La magia se agotó. El elfo se durmió. Y ya no despertó. Los siglos que vivió fueron, al final, un parpadeo que nadie vio.',
+    absorbido:'Se quedó quieto. Y el Vacío lo llamó suyo. La eternidad que buscaba se la dio la nada. Irónicamente, al fin, fue infinito.'
+  }
+};
+
+const LIMBO = {
+  soldado:'El guerrero no cayó en batalla. Simplemente un día no estaba. Y no hubo quien lo llorara, porque ya nadie recordaba su nombre. Las espadas que forjó siguen en manos de otros. Pero él... ¿qué él?',
+  enano:'El yunque quedó frío. El metal sin forjar. El taller cerrado. Y el herrero... ¿qué herrero? Nunca hubo un herrero aquí. Nunca hubo un taller. Nunca hubo un yunque. La niebla olvidó incluso el eco del martillo.',
+  elfo:'La última luz no se apagó. Simplemente dejó de iluminar. Y el bosque no lloró, porque no recordaba haber sido iluminado. Los siglos que viviste no fueron siglos: fueron un parpadeo que nadie vio.'
+};
+
+const LIMBO_CIERRE = 'El Limbo no es un castigo. Es la consecuencia de haber vivido sin vivir. De haber conocido sin conocer. De haber estado sin estar.\n\nLa niebla no te juzga. Solo te olvida. Y tú, por fin, dejas de intentar recordar.';
+
+/* ============================================================
+   PERSONALIZACIÓN POR BANDA DOMINANTE
+   ============================================================ */
+const BANDA_FINAL = {
+  1: 'Y mientras te disuelves, ves una casa vacía. Tu casa. Y en la puerta, ella. Esperándote. Como siempre.',
+  2: 'Y mientras te disuelves, ves una sola cara. La misma de siempre. La de ella. Tu esposa. Tu amiga de la infancia. Y ella sonríe.',
+  3: 'Y mientras te disuelves, ves por última vez los rostros de quienes te formaron: tu padre, tu madre, tu amigo, tu maestro. Ellos te esperan.',
+  4: 'Y mientras te disuelves, ves seis caras. Seis vidas. Seis mundos. Todos tuyos.',
+  5: 'Y mientras te disuelves, ves un horizonte lleno de rostros. Hijos, nietos, amantes, enemigos, extraños. Todos te despiden.'
+};
+
+/* ============================================================
+   ESTADO GLOBAL
+   ============================================================ */
+let S = {};
+
+function estadoInicial() {
+  return {
+    origin: null,
+    presencia: 6, maxPresencia: 6,
+    memoria: 0, maxMemoria: 6,
+    anclas: 1, maxAnclas: 4,
+    niebla: 0, maxNiebla: 10,
+    deriva: 0,
+    karma: 0,
+    totalCaminar: 0,
+    totalQuedarse: 0,
+    encuentrosVisitados: [],
+    bandasVisitadas: { 1:0, 2:0, 3:0, 4:0, 5:0 },
+    limboActivo: false,
+    cuentaLimbo: 10,
+    ultimaDecision: null,
+    habilidadUsada: false,
+    fase: 'origen',
+    esperandoRespuesta: false,
+    proximaTirada: null
+  };
+}
+
+/* ============================================================
+   UTILIDADES
+   ============================================================ */
+const $ = id => document.getElementById(id);
+const d6 = () => Math.floor(Math.random() * 6) + 1;
+
+function log(texto, clase = 'sys') {
+  const el = $('log');
+  const div = document.createElement('div');
+  div.className = 'entry ' + clase;
+  div.innerHTML = texto.replace(/\n/g, '<br>');
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+
+function limpiarLog() { $('log').innerHTML = ''; }
+
+function getBanda(deriva) {
+  if (deriva <= -6) return 1;
+  if (deriva <= -3) return 2;
+  if (deriva <= 2) return 3;
+  if (deriva <= 5) return 4;
+  return 5;
+}
+
+function actualizarUI() {
+  $('valPres').textContent = `${S.presencia}/${S.maxPresencia}`;
+  $('valMem').textContent = `${S.memoria}/${S.maxMemoria}`;
+  $('valAnc').textContent = `${S.anclas}/${S.maxAnclas}`;
+  $('valNie').textContent = `${S.niebla}/${S.maxNiebla}`;
+  $('valKar').textContent = (S.karma >= 0 ? '+' : '') + S.karma;
+
+  $('valKar').className = 'val kar' + (S.karma >= 5 ? ' pos' : S.karma <= -5 ? ' neg' : '');
+  $('statKar').className = 'stat' + (S.karma >= 5 ? ' salvacion' : S.karma <= -5 ? ' condena' : '');
+
+  const banda = getBanda(S.deriva);
+  $('derivaVal').textContent = S.deriva;
+  $('derivaBandName').textContent = `${BANDAS[banda].nombre} — ${BANDAS[banda].etapa}`;
+  for (let i = 1; i <= 5; i++) {
+    $('seg' + i).classList.toggle('active', i === banda);
+  }
+
+  if (S.limboActivo) {
+    $('limboWrap').classList.add('active');
+    $('limboCount').textContent = S.cuentaLimbo;
+  } else {
+    $('limboWrap').classList.remove('active');
+  }
+
+  const activo = S.fase === 'juego' && !S.esperandoRespuesta;
+  $('btnWalk').disabled = !activo;
+  $('btnStay').disabled = !activo;
+
+  // Botón de habilidad de origen
+  const btn = $('btnExtra1');
+  if (S.origin === 'enano' && !S.habilidadUsada && S.memoria >= 2 && S.fase === 'juego') {
+    btn.style.display = 'inline-block';
+    btn.textContent = '⚒️ Forjar Ancla (2 MEM → 1 Ancla)';
+  } else if (S.origin === 'elfo' && !S.habilidadUsada && S.fase === 'juego') {
+    btn.style.display = 'inline-block';
+    btn.textContent = '🧝 Escuchar la Niebla (-1 Presencia)';
+  } else {
+    btn.style.display = 'none';
+  }
+}
+
+/* ============================================================
+   ORIGEN
+   ============================================================ */
+function elegirOrigen(o) {
+  S = estadoInicial();
+  S.origin = o;
+  S.fase = 'juego';
+  if (o === 'soldado') {
+    S.maxPresencia = 8;
+    S.presencia = 8;
+  } else if (o === 'enano') {
+    S.niebla = 2;
+  }
+  $('overlayOrigen').classList.remove('active');
+  limpiarLog();
+  const nombres = { soldado:'⚔️ El Soldado', enano:'⚒️ El Enano Herrero', elfo:'🧝 El Elfo Mago' };
+  log(`Recuerdas quién fuiste: ${nombres[o]}.`, 'sys');
+  log('Abres los ojos en la niebla. No ves tus manos. No sabes si estás arriba o abajo. Solo sientes el peso de tu cuerpo y el latido de tu pecho.', 'sys');
+  log('Cada turno decides: ¿caminar hacia adelante, o quedarte quieto?', 'sys');
+  actualizarUI();
+}
+
+/* ============================================================
+   DECISIÓN PRINCIPAL
+   ============================================================ */
+function decidir(accion) {
+  if (S.fase !== 'juego' || S.esperandoRespuesta) return;
+  S.ultimaDecision = accion;
+
+  if (accion === 'caminar') {
+    S.deriva++;
+    S.totalCaminar++;
+    log('🚶 Caminas. La niebla se agita. No sabes si avanzas o retrocedes.', 'walk');
+  } else {
+    S.deriva--;
+    S.totalQuedarse++;
+    log('🧍 Te quedas quieto. La niebla se espesa. El silencio pesa.', 'stay');
+  }
+
+  // Check Deriva
+  if (S.deriva >= 10) {
+    actualizarUI();
+    return irAlCentro();
+  }
+  if (S.deriva <= -10) {
+    actualizarUI();
+    return finalDisolucion('absorbido');
+  }
+
+  // Tirada de encuentro
+  if (S.limboActivo) {
+    // No hay encuentros, solo cuenta regresiva
+    log('La niebla está vacía. No hay rostros. Solo tú.', 'niebla');
+  } else {
+    const roll = S.proximaTirada !== null ? S.proximaTirada : d6();
+    if (S.proximaTirada !== null) {
+      log(`🧝 Escuchaste la Niebla: la tirada era ${roll}.`, 'sys');
+      S.proximaTirada = null;
+    } else {
+      log(`🎲 Tirada de encuentro: ${roll}`, 'sys');
+    }
+
+    if (roll >= 4) {
+      const banda = getBanda(S.deriva);
+      const disponibles = ENCUENTROS[banda].filter(e => !S.encuentrosVisitados.includes(e.id));
+      if (disponibles.length > 0) {
+        const enc = disponibles[Math.floor(Math.random() * disponibles.length)];
+        // No procesamos el resto del turno hasta que responda
+        mostrarEncuentro(enc);
+        return; // esperamos respuesta
+      } else {
+        // No hay encuentros disponibles en esta banda → activar Limbo
+        S.limboActivo = true;
+        S.cuentaLimbo = 10;
+        log('🌫️ La niebla ya no te muestra rostros. Has agotado los encuentros de esta etapa.', 'danger');
+        log('CUENTA DEL LIMBO: 10 turnos.', 'danger');
+      }
+    } else {
+      log('Nada. Solo niebla.', 'niebla');
+    }
+  }
+
+  finalizarTurno();
+}
+
+/* ============================================================
+   FINALIZAR TURNO (Niebla, Presencia, Limbo)
+   ============================================================ */
+function finalizarTurno() {
+  // Niebla sube
+  let subidaNiebla = 1;
+  if (S.karma >= 5) subidaNiebla -= 1;
+  if (S.karma <= -5) subidaNiebla += 1;
+  subidaNiebla = Math.max(0, subidaNiebla);
+  S.niebla += subidaNiebla;
+  if (subidaNiebla > 0) {
+    log(`🌫️ La Niebla sube +${subidaNiebla}. (${S.niebla}/${S.maxNiebla})`, 'niebla');
+  } else {
+    log(`🌫️ La Niebla se mantiene. (${S.niebla}/${S.maxNiebla})`, 'good');
+  }
+
+  // Daño a Presencia
+  const dano = Math.max(0, Math.floor(S.niebla / 2) - S.anclas);
+  if (dano > 0) {
+    S.presencia -= dano;
+    log(`🕯️ La Niebla te consume: -${dano} Presencia.`, 'danger');
+  }
+
+  // Checks de muerte
+  if (S.niebla >= 10) { actualizarUI(); return finalDisolucion('disuelto'); }
+  if (S.presencia <= 0) { actualizarUI(); return finalDisolucion('apagado'); }
+
+  // Cuenta del Limbo
+  if (S.limboActivo) {
+    S.cuentaLimbo--;
+    log(`⏳ Cuenta del Limbo: ${S.cuentaLimbo}`, 'danger');
+    if (S.cuentaLimbo <= 0) {
+      actualizarUI();
+      return finalLimbo();
+    }
+  }
+
+  actualizarUI();
+}
+
+/* ============================================================
+   ENCUENTRO
+   ============================================================ */
+function mostrarEncuentro(enc) {
+  S.esperandoRespuesta = true;
+  S.encuentrosVisitados.push(enc.id);
+  const banda = getBanda(S.deriva);
+  S.bandasVisitadas[banda]++;
+
+  const dialogo = S.ultimaDecision === 'caminar' ? enc.camina : enc.quieto;
+
+  log(`— ${enc.nombre} —`, 'enc');
+  log(`"${dialogo}"`, 'dial');
+
+  $('encName').textContent = enc.nombre;
+  $('encDial').textContent = `"${dialogo}"`;
+  $('encQ').textContent = enc.pregunta;
+
+  const opts = $('encOpts');
+  opts.innerHTML = '';
+  enc.opciones.forEach((op, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'enc-opt';
+    btn.textContent = (i === 0 ? '🅰️ ' : '🅱️ ') + op.texto;
+    btn.onclick = () => responder(enc, op);
+    opts.appendChild(btn);
+  });
+
+  $('overlayEnc').classList.add('active');
+  actualizarUI();
+}
+
+function responder(enc, opcion) {
+  $('overlayEnc').classList.remove('active');
+  S.esperandoRespuesta = false;
+
+  log(`> ${opcion.texto}`, opcion.karma > 0 ? 'opt' : 'opt neg');
+
+  S.karma += opcion.karma;
+  if (opcion.karma > 0) {
+    log(`✨ Karma +1. (Total: ${S.karma})`, 'kar-pos');
+  } else {
+    log(`🌑 Karma −1. (Total: ${S.karma})`, 'kar-neg');
+    // Maldición del Soldado
+    if (S.origin === 'soldado') {
+      S.niebla += 1;
+      log(`⚔️ La guerra te persigue: Niebla +1.`, 'danger');
+    }
+  }
+
+  actualizarUI();
+  finalizarTurno();
+}
+
+/* ============================================================
+   HABILIDAD DE ORIGEN
+   ============================================================ */
+function usarHabilidadOrigen() {
+  if (S.habilidadUsada) return;
+  if (S.origin === 'enano') {
+    if (S.memoria < 2) return;
+    S.memoria -= 2;
+    S.anclas = Math.min(S.maxAnclas, S.anclas + 1);
+    S.habilidadUsada = true;
+    log('⚒️ Forjas un Ancla nueva del dolor viejo. (Memoria −2, Anclas +1)', 'good');
+  } else if (S.origin === 'elfo') {
+    if (S.presencia <= 1) return;
+    S.presencia -= 1;
+    S.proximaTirada = d6();
+    S.habilidadUsada = true;
+    log('🧝 Escuchas la Niebla. Pagas con un poco de ti. (Presencia −1)', 'good');
+    log(`   La próxima tirada de encuentro será: ${S.proximaTirada}`, 'sys');
+  }
+  actualizarUI();
+}
+
+/* ============================================================
+   CENTRO Y FINALES
+   ============================================================ */
+function irAlCentro() {
+  S.fase = 'centro';
+  log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'sys');
+  log('Llegas al Centro. La niebla se detiene. Por primera vez, hay silencio.', 'sys');
+  log('Frente a ti, un reflejo. Tú mismo. Sin filtros.', 'sys');
+  log('"Ya casi sabes quién eres. ¿Quieres saberlo?"', 'dial');
+  log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'sys');
+  setTimeout(() => mostrarFinal(), 400);
+}
+
+function mostrarFinal() {
+  S.fase = 'final';
+  const activo = S.totalCaminar > S.totalQuedarse;
+  const salvacion = S.karma >= 5;
+  const clave = `${S.origin}-${activo ? 'activo' : 'pasivo'}-${salvacion ? 'salvacion' : 'retorno'}`;
+  const final = FINALES[clave];
+
+  // Banda dominante
+  let bandaDom = 3, maxVisitas = 0;
+  for (let b = 1; b <= 5; b++) {
+    if (S.bandasVisitadas[b] > maxVisitas) {
+      maxVisitas = S.bandasVisitadas[b];
+      bandaDom = b;
+    }
+  }
+  const parrafoBanda = BANDA_FINAL[bandaDom];
+
+  log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'sys');
+  log(`🏁 FINAL: "${final.titulo}"`, salvacion ? 'good' : 'danger');
+  log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'sys');
+  log(final.texto, 'final');
+  log(parrafoBanda, 'final');
+
+  $('btnWalk').disabled = true;
+  $('btnStay').disabled = true;
+  $('btnExtra1').style.display = 'none';
+  $('btnReiniciar').style.display = 'inline-block';
+  actualizarUI();
+}
+
+function finalDisolucion(tipo) {
+  S.fase = 'final';
+  const textos = DISOLUCION[S.origin];
+  const titulos = { disuelto:'DISUELTO', apagado:'APAGADO', absorbido:'ABSORBIDO' };
+  log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'sys');
+  log(`☠️ ${titulos[tipo]}`, 'danger');
+  log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'sys');
+  log(textos[tipo], 'final retorno');
+
+  $('btnWalk').disabled = true;
+  $('btnStay').disabled = true;
+  $('btnExtra1').style.display = 'none';
+  $('btnReiniciar').style.display = 'inline-block';
+  actualizarUI();
+}
+
+function finalLimbo() {
+  S.fase = 'final';
+  log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'sys');
+  log('🌑 EL LIMBO', 'danger');
+  log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'sys');
+  log('Y entonces, sin ruido, sin dolor, sin despedida, dejas de estar. No mueres. No descansas. No recuerdas. No eres.', 'final limbo');
+  log(LIMBO[S.origin], 'final limbo');
+  log(LIMBO_CIERRE, 'final limbo');
+
+  $('btnWalk').disabled = true;
+  $('btnStay').disabled = true;
+  $('btnExtra1').style.display = 'none';
+  $('btnReiniciar').style.display = 'inline-block';
+  actualizarUI();
+}
+
+/* ============================================================
+   REINICIO
+   ============================================================ */
+function reiniciarCiclo() {
+  S = estadoInicial();
+  $('overlayOrigen').classList.add('active');
+  $('btnReiniciar').style.display = 'none';
+  limpiarLog();
+  actualizarUI();
+}
+
+/* ============================================================
+   INICIALIZACIÓN
+   ============================================================ */
+S = estadoInicial();
+actualizarUI();
+</script>
+</body>
+</html>
