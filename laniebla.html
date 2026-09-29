@@ -14,7 +14,6 @@
     overflow: hidden;
   }
 
-  /* Fondo con imagen de niebla */
   #fogBg {
     position: fixed; inset: 0;
     z-index: 0;
@@ -35,10 +34,25 @@
   }
   #fogBg.fade { opacity: 0; }
 
-  /* Contenedor principal */
+  /* Viñeta de peligro cuando la Presencia baja */
+  #dangerVignette {
+    position: fixed; inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 1s ease;
+    box-shadow: inset 0 0 200px rgba(139, 20, 20, 0.5);
+  }
+  #dangerVignette.warn { opacity: 0.4; animation: dangerPulse 2.5s infinite; }
+  #dangerVignette.critical { opacity: 0.8; animation: dangerPulse 1.2s infinite; }
+  @keyframes dangerPulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.7; }
+  }
+
   .app {
     position: relative;
-    z-index: 1;
+    z-index: 2;
     height: 100vh;
     display: flex;
     justify-content: center;
@@ -55,7 +69,9 @@
     border-radius: 14px;
     padding: 22px;
     box-shadow: 0 0 80px rgba(0, 0, 0, 0.5);
+    transition: border-color 1s ease;
   }
+  .container.danger { border-color: rgba(180, 40, 40, 0.4); }
 
   h1 {
     font-family: 'Cormorant', Georgia, serif;
@@ -72,43 +88,37 @@
     font-size: 10px;
     color: #6a6a72;
     letter-spacing: 4px;
-    margin-bottom: 18px;
+    margin-bottom: 14px;
     text-transform: uppercase;
   }
 
-  /* Stats */
-  .stats {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 8px;
-    margin-bottom: 12px;
-  }
-  .stat {
-    background: rgba(20, 20, 26, 0.75);
-    border: 1px solid rgba(60, 60, 70, 0.4);
-    border-radius: 8px;
-    padding: 8px 12px;
+  /* Panel de estrellas de karma */
+  .karma-panel {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 14px;
+    padding: 6px 0;
+    min-height: 24px;
   }
-  .stat .lbl {
-    font-size: 10px;
-    color: #6a6a72;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-  }
-  .stat .val {
+  .karma-star {
     font-size: 20px;
-    font-weight: 600;
-    font-family: 'Cormorant', Georgia, serif;
+    line-height: 1;
+    transition: all 0.4s ease;
+    filter: drop-shadow(0 0 4px rgba(0,0,0,0.5));
   }
-  .stat .val.pres { color: #f0e6d2; }
-  .stat .val.kar { color: #c8a8d8; }
-  .stat .val.kar.pos { color: #8fd89f; text-shadow: 0 0 8px rgba(143,216,159,0.4); }
-  .stat .val.kar.neg { color: #e88a7a; text-shadow: 0 0 8px rgba(232,138,122,0.4); }
-  .stat.salvacion { border-color: rgba(230,168,80,0.5); box-shadow: 0 0 15px rgba(230,168,80,0.15); }
-  .stat.condena { border-color: rgba(139,58,42,0.6); box-shadow: 0 0 15px rgba(139,58,42,0.2); }
+  .karma-star.yellow {
+    color: #f4d03f;
+    text-shadow: 0 0 12px rgba(244, 208, 63, 0.7), 0 0 4px rgba(244, 208, 63, 0.9);
+  }
+  .karma-star.black {
+    color: #1a1a1a;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.9), 0 0 3px rgba(80, 20, 20, 0.8);
+    -webkit-text-stroke: 1px #3a2a2a;
+  }
+  .karma-star.empty {
+    color: rgba(80, 80, 90, 0.25);
+  }
 
   /* Deriva */
   .deriva-wrap {
@@ -243,9 +253,10 @@
   .log .entry.q { color: #f0e6d2; font-weight: 500; margin-top: 6px; }
   .log .entry.opt { color: #a8c4d8; padding-left: 12px; }
   .log .entry.opt.neg { color: #d88a7a; }
-  .log .entry.kar-pos { color: #8fd89f; font-size: 13px; }
-  .log .entry.kar-neg { color: #e88a7a; font-size: 13px; }
-  .log .entry.niebla { color: #b8b0a8; font-size: 12px; font-style: italic; }
+  .log .entry.kar-pos { color: #f4d03f; font-size: 13px; }
+  .log .entry.kar-neg { color: #6a6a72; font-size: 13px; font-style: italic; }
+  .log .entry.nothing { color: #7a7a82; font-style: italic; font-size: 13px; }
+  .log .entry.atmos { color: #9aa8b8; font-style: italic; font-size: 13px; }
   .log .entry.danger { color: #e88a7a; font-weight: 600; }
   .log .entry.good { color: #8fd89f; }
   .log .entry.final {
@@ -339,28 +350,21 @@
     .container { padding: 14px; }
     h1 { font-size: 22px; letter-spacing: 5px; }
     .log { height: 200px; font-size: 13px; }
+    .karma-star { font-size: 16px; }
   }
 </style>
 </head>
 <body>
 
 <div id="fogBg"></div>
+<div id="dangerVignette"></div>
 
 <div class="app">
-  <div class="container">
+  <div class="container" id="container">
     <h1>LA NIEBLA</h1>
     <div class="subtitle">Un viaje por el Vacío</div>
 
-    <div class="stats">
-      <div class="stat">
-        <span class="lbl">Presencia</span>
-        <span class="val pres" id="valPres">20</span>
-      </div>
-      <div class="stat" id="statKar">
-        <span class="lbl">Karma</span>
-        <span class="val kar" id="valKar">0</span>
-      </div>
-    </div>
+    <div class="karma-panel" id="karmaPanel"></div>
 
     <div class="deriva-wrap">
       <div class="deriva-header">
@@ -395,7 +399,6 @@
   </div>
 </div>
 
-<!-- Modal Origen -->
 <div class="overlay active" id="overlayOrigen">
   <div class="overlay-box">
     <h2>EL RITO DEL ORIGEN</h2>
@@ -403,25 +406,24 @@
     <button class="origin-btn" onclick="elegirOrigen('soldado')">
       <span class="oname">⚔️ El Soldado</span>
       <span class="odesc">Un hombre o mujer de mil batallas. Sobreviviste a todo.</span>
-      <span class="opow">+ 25 Presencia inicial. Sabes aguantar.</span>
+      <span class="opow">+ Sabes aguantar más que nadie.</span>
       <span class="omal">− Cada vez que fallas, la Niebla se espesa más rápido.</span>
     </button>
     <button class="origin-btn" onclick="elegirOrigen('enano')">
       <span class="oname">⚒️ El Enano Herrero</span>
       <span class="odesc">Famoso por forjar mithril. Tus manos crearon cosas hermosas.</span>
-      <span class="opow">+ Una vez por ciclo: reparar tu cuerpo (+6 Presencia).</span>
-      <span class="omal">− La Niebla te reconoce: empiezas con la niebla algo espesa.</span>
+      <span class="opow">+ Una vez por ciclo: reparar tu cuerpo.</span>
+      <span class="omal">− La Niebla te reconoce: empiezas con ella más espesa.</span>
     </button>
     <button class="origin-btn" onclick="elegirOrigen('elfo')">
       <span class="oname">🧝 El Elfo Mago</span>
       <span class="odesc">Alto, antiguo, dominabas los elementos.</span>
-      <span class="opow">+ Una vez por ciclo: Escuchar la Niebla (ver próxima tirada).</span>
-      <span class="omal">− La magia cuesta: cada vez que Escuchas, pierdes 3 Presencia.</span>
+      <span class="opow">+ Una vez por ciclo: Escuchar la Niebla.</span>
+      <span class="omal">− La magia cuesta: cada vez que Escuchas, pierdes Presencia.</span>
     </button>
   </div>
 </div>
 
-<!-- Modal Encuentro -->
 <div class="overlay" id="overlayEnc">
   <div class="enc-box">
     <div class="enc-name" id="encName"></div>
@@ -433,258 +435,100 @@
 
 <script>
 /* ============================================================
-   DATOS: 30 ENCUENTROS
+   20 FRASES DE "NADA PASA"
+   ============================================================ */
+const FRASES_NADA = [
+  'Caminas. La niebla no se mueve.',
+  'El silencio se prolonga.',
+  'No hay nada. Solo tú.',
+  'El aire está quieto.',
+  'Sigues adelante sin encontrar nada.',
+  'El tiempo pasa sin dejar huella.',
+  'La niebla te ignora.',
+  'No hay rostros. No hay voces.',
+  'Solo el latido de tu pecho.',
+  'El vacío te acompaña.',
+  'Nada cambia. Nada se mueve.',
+  'La niebla sigue igual de espesa.',
+  'Avanzas sin rumbo. Sin destino.',
+  'El silencio no se rompe.',
+  'Tu respiración es lo único que oyes.',
+  'La nada te rodea.',
+  'Nadie viene. Nadie va.',
+  'El mundo sigue vacío.',
+  'Caminas. Nada más.',
+  'Solo niebla. Siempre niebla.'
+];
+
+/* ============================================================
+   20 FRASES ATMOSFÉRICAS
+   ============================================================ */
+const FRASES_ATMOS = [
+  'El viento sopla. Frío. Muy frío.',
+  'Un escalofrío te recorre la espalda.',
+  'La angustia te llena el pecho.',
+  'Escuchas algo lejano. O crees escucharlo.',
+  'El frío se cuela por tus huesos.',
+  'Un peso invisible te oprime.',
+  'La niebla susurra algo que no entiendes.',
+  'Sientes que alguien te observa.',
+  'El aire huele a ceniza.',
+  'Un temblor recorre tu cuerpo.',
+  'La soledad te golpea de pronto.',
+  'Escuchas un latido. No es el tuyo.',
+  'El frío te abraza como una mano.',
+  'Algo se mueve en la niebla. O no.',
+  'La tristeza te inunda sin razón.',
+  'Sientes que olvidas algo importante.',
+  'El viento trae un olor a flores muertas.',
+  'Un suspiro. Cerca. Muy cerca.',
+  'La niebla se vuelve más densa. O más fría.',
+  'Presientes que algo te sigue.'
+];
+
+/* ============================================================
+   30 ENCUENTROS
    ============================================================ */
 const ENCUENTROS = {
   1: [
-    { id:'1-1', nombre:'Tu Esposa Moribunda',
-      camina:'Te ve llegar desde la cama. "¿Por qué caminas ahora? Toda la vida te quedaste quieto. Y ahora que me muero, te mueves. Qué ironía."',
-      quieto:'Aquí estás. Como siempre. A mi lado. Callado. No sé si es amor o costumbre. Pero te agradezco.',
-      pregunta:'¿Alguna vez deseaste haberme dejado?',
-      opciones:[
-        { texto:'Nunca. Fuiste mi única vida.', karma:1 },
-        { texto:'A veces. Pero me quedé.', karma:-1 }
-      ]},
-    { id:'1-2', nombre:'Tus Hijos que se Fueron',
-      camina:'Nos dejaste. No como nosotros a ti, sino al revés. Tú te quedaste, nosotros volamos. Y ahora volvemos, y ya no estás.',
-      quieto:'Nos criaste. Nos viste ir. Nunca nos pediste que volviéramos. Y nunca volvimos.',
-      pregunta:'¿Nos perdonas por habernos ido?',
-      opciones:[
-        { texto:'Siempre. La vida es de los que se van.', karma:1 },
-        { texto:'No. Me dejaron solo.', karma:-1 }
-      ]},
-    { id:'1-3', nombre:'El Sacerdote de la Extremaunción',
-      camina:'Te vi caminar hacia mí. Cojeando. Como si aún buscaras algo. Pero ya no hay nada que buscar, hijo.',
-      quieto:'Aquí estás. En la misma banca donde te bauticé. Donde te casé. Donde enterré a tu esposa. Y ahora te entierro a ti.',
-      pregunta:'¿Estás en paz con Dios?',
-      opciones:[
-        { texto:'Sí. Hice lo que pude.', karma:1 },
-        { texto:'No. Nunca creí del todo.', karma:-1 }
-      ]},
-    { id:'1-4', nombre:'El Sepulturero',
-      camina:'Te veo llegar. Es raro. Normalmente la gente llega en caja. Tú llegas a pie.',
-      quieto:'Esta es tu tumba. Al lado de la de ella. Como pediste. La tierra aquí es blanda. Blanda como toda esta vida.',
-      pregunta:'¿Quieres que te entierre con algo?',
-      opciones:[
-        { texto:'Con nada. Me voy como vine.', karma:1 },
-        { texto:'Con todo. Que me recuerden.', karma:-1 }
-      ]},
-    { id:'1-5', nombre:'La Casa Vacía',
-      camina:'Nunca caminaste lejos de mí. Pero ahora que lo haces, te extraño. Aunque nunca me hablaste.',
-      quieto:'Aquí envejeciste. Aquí lloraste. Aquí reíste una vez, creo recordar. Aquí morirás. Y yo seguiré aquí.',
-      pregunta:'¿Alguna vez me consideraste un hogar?',
-      opciones:[
-        { texto:'Siempre. Eras mi refugio.', karma:1 },
-        { texto:'Eras solo paredes.', karma:-1 }
-      ]},
-    { id:'1-6', nombre:'Tu Propio Reflejo',
-      camina:'Mírate. Caminaste toda la vida... y terminaste aquí. Solo. Viejo. Sin nadie. ¿Valió la pena?',
-      quieto:'Mírate. Te quedaste toda la vida... y terminaste aquí. Solo. Viejo. Sin nadie. ¿Valió la pena?',
-      pregunta:'¿Volverías a vivir la misma vida?',
-      opciones:[
-        { texto:'Sí. Fue mi vida. La acepto.', karma:1 },
-        { texto:'No. No valió la pena.', karma:-1 }
-      ]}
+    { id:'1-1', nombre:'Tu Esposa Moribunda', camina:'Te ve llegar desde la cama. "¿Por qué caminas ahora? Toda la vida te quedaste quieto. Y ahora que me muero, te mueves. Qué ironía."', quieto:'Aquí estás. Como siempre. A mi lado. Callado. No sé si es amor o costumbre. Pero te agradezco.', pregunta:'¿Alguna vez deseaste haberme dejado?', opciones:[{ texto:'Nunca. Fuiste mi única vida.', karma:1 },{ texto:'A veces. Pero me quedé.', karma:-1 }]},
+    { id:'1-2', nombre:'Tus Hijos que se Fueron', camina:'Nos dejaste. No como nosotros a ti, sino al revés. Tú te quedaste, nosotros volamos. Y ahora volvemos, y ya no estás.', quieto:'Nos criaste. Nos viste ir. Nunca nos pediste que volviéramos. Y nunca volvimos.', pregunta:'¿Nos perdonas por habernos ido?', opciones:[{ texto:'Siempre. La vida es de los que se van.', karma:1 },{ texto:'No. Me dejaron solo.', karma:-1 }]},
+    { id:'1-3', nombre:'El Sacerdote de la Extremaunción', camina:'Te vi caminar hacia mí. Cojeando. Como si aún buscaras algo. Pero ya no hay nada que buscar, hijo.', quieto:'Aquí estás. En la misma banca donde te bauticé. Donde te casé. Donde enterré a tu esposa. Y ahora te entierro a ti.', pregunta:'¿Estás en paz con Dios?', opciones:[{ texto:'Sí. Hice lo que pude.', karma:1 },{ texto:'No. Nunca creí del todo.', karma:-1 }]},
+    { id:'1-4', nombre:'El Sepulturero', camina:'Te veo llegar. Es raro. Normalmente la gente llega en caja. Tú llegas a pie.', quieto:'Esta es tu tumba. Al lado de la de ella. Como pediste. La tierra aquí es blanda. Blanda como toda esta vida.', pregunta:'¿Quieres que te entierre con algo?', opciones:[{ texto:'Con nada. Me voy como vine.', karma:1 },{ texto:'Con todo. Que me recuerden.', karma:-1 }]},
+    { id:'1-5', nombre:'La Casa Vacía', camina:'Nunca caminaste lejos de mí. Pero ahora que lo haces, te extraño. Aunque nunca me hablaste.', quieto:'Aquí envejeciste. Aquí lloraste. Aquí reíste una vez, creo recordar. Aquí morirás. Y yo seguiré aquí.', pregunta:'¿Alguna vez me consideraste un hogar?', opciones:[{ texto:'Siempre. Eras mi refugio.', karma:1 },{ texto:'Eras solo paredes.', karma:-1 }]},
+    { id:'1-6', nombre:'Tu Propio Reflejo', camina:'Mírate. Caminaste toda la vida... y terminaste aquí. Solo. Viejo. Sin nadie. ¿Valió la pena?', quieto:'Mírate. Te quedaste toda la vida... y terminaste aquí. Solo. Viejo. Sin nadie. ¿Valió la pena?', pregunta:'¿Volverías a vivir la misma vida?', opciones:[{ texto:'Sí. Fue mi vida. La acepto.', karma:1 },{ texto:'No. No valió la pena.', karma:-1 }]}
   ],
   2: [
-    { id:'2-1', nombre:'La Esposa Joven',
-      camina:'Llegaste tarde a nuestra boda. Como siempre. Pero llegaste. Y eso bastó.',
-      quieto:'Estabas quieto en el altar. Como siempre. Y yo te miré y supe que sería así toda la vida.',
-      pregunta:'¿Alguna vez te arrepentiste de haberme elegido?',
-      opciones:[
-        { texto:'Nunca. Fuiste mi destino.', karma:1 },
-        { texto:'A veces. Pero me quedé.', karma:-1 }
-      ]},
-    { id:'2-2', nombre:'La Esposa Embarazada',
-      camina:'Estabas fuera cuando nació. Trabajando. Llegaste tres días después. Con las manos vacías y los ojos llenos.',
-      quieto:'Estabas aquí. En la puerta. Sin moverte. Viéndome parir. Sin decir nada. Pero estabas.',
-      pregunta:'¿Sentiste miedo de ser padre?',
-      opciones:[
-        { texto:'Sí. Pero me quedé.', karma:1 },
-        { texto:'No. Era mi deber.', karma:-1 }
-      ]},
-    { id:'2-3', nombre:'La Esposa Cansada',
-      camina:'Volviste del trabajo. Cansado. Yo también. Nos miramos. No dijimos nada. Así fue durante veinte años.',
-      quieto:'Nunca te fuiste. Yo nunca me fui. Y sin embargo, estábamos solos. Juntos, pero solos.',
-      pregunta:'¿Alguna vez me viste de verdad?',
-      opciones:[
-        { texto:'Siempre. Incluso cuando callaba.', karma:1 },
-        { texto:'No. Estaba ocupado sobreviviendo.', karma:-1 }
-      ]},
-    { id:'2-4', nombre:'La Esposa Enferma',
-      camina:'Cuando me enfermé, no estabas. Estabas trabajando. Volviste cuando ya no había nada que hacer.',
-      quieto:'Cuando me enfermé, te quedaste. Sin moverte. Sin hablar. Día tras día. Nunca me soltaste la mano.',
-      pregunta:'¿Alguna vez pensaste en dejarme?',
-      opciones:[
-        { texto:'Nunca. Habría muerto contigo.', karma:1 },
-        { texto:'A veces. Pero no me fui.', karma:-1 }
-      ]},
-    { id:'2-5', nombre:'La Esposa Anciana',
-      camina:'Mira nuestras manos. Arrugadas. Nunca tocaron el mundo. Solo se tocaron entre sí.',
-      quieto:'Mira nuestras manos. Nunca tocaron a nadie más. ¿Fue suficiente? ¿O solo fue lo único que conocimos?',
-      pregunta:'¿Volverías a casarte conmigo?',
-      opciones:[
-        { texto:'Mil veces. En mil vidas.', karma:1 },
-        { texto:'No lo sé. Ya no sé nada.', karma:-1 }
-      ]},
-    { id:'2-6', nombre:'La Esposa Muerta',
-      camina:'Me enterraste. Y luego seguiste caminando. Sin mí. Como si nada.',
-      quieto:'Me enterraste. Y luego te sentaste a mi lado. Y te quedaste. Y sigues aquí. Conmigo. Aunque ya no estoy.',
-      pregunta:'¿Alguna vez me olvidaste?',
-      opciones:[
-        { texto:'Nunca. Eres mi único recuerdo.', karma:1 },
-        { texto:'Sí. La vida sigue.', karma:-1 }
-      ]}
+    { id:'2-1', nombre:'La Esposa Joven', camina:'Llegaste tarde a nuestra boda. Como siempre. Pero llegaste. Y eso bastó.', quieto:'Estabas quieto en el altar. Como siempre. Y yo te miré y supe que sería así toda la vida.', pregunta:'¿Alguna vez te arrepentiste de haberme elegido?', opciones:[{ texto:'Nunca. Fuiste mi destino.', karma:1 },{ texto:'A veces. Pero me quedé.', karma:-1 }]},
+    { id:'2-2', nombre:'La Esposa Embarazada', camina:'Estabas fuera cuando nació. Trabajando. Llegaste tres días después. Con las manos vacías y los ojos llenos.', quieto:'Estabas aquí. En la puerta. Sin moverte. Viéndome parir. Sin decir nada. Pero estabas.', pregunta:'¿Sentiste miedo de ser padre?', opciones:[{ texto:'Sí. Pero me quedé.', karma:1 },{ texto:'No. Era mi deber.', karma:-1 }]},
+    { id:'2-3', nombre:'La Esposa Cansada', camina:'Volviste del trabajo. Cansado. Yo también. Nos miramos. No dijimos nada. Así fue durante veinte años.', quieto:'Nunca te fuiste. Yo nunca me fui. Y sin embargo, estábamos solos. Juntos, pero solos.', pregunta:'¿Alguna vez me viste de verdad?', opciones:[{ texto:'Siempre. Incluso cuando callaba.', karma:1 },{ texto:'No. Estaba ocupado sobreviviendo.', karma:-1 }]},
+    { id:'2-4', nombre:'La Esposa Enferma', camina:'Cuando me enfermé, no estabas. Estabas trabajando. Volviste cuando ya no había nada que hacer.', quieto:'Cuando me enfermé, te quedaste. Sin moverte. Sin hablar. Día tras día. Nunca me soltaste la mano.', pregunta:'¿Alguna vez pensaste en dejarme?', opciones:[{ texto:'Nunca. Habría muerto contigo.', karma:1 },{ texto:'A veces. Pero no me fui.', karma:-1 }]},
+    { id:'2-5', nombre:'La Esposa Anciana', camina:'Mira nuestras manos. Arrugadas. Nunca tocaron el mundo. Solo se tocaron entre sí.', quieto:'Mira nuestras manos. Nunca tocaron a nadie más. ¿Fue suficiente? ¿O solo fue lo único que conocimos?', pregunta:'¿Volverías a casarte conmigo?', opciones:[{ texto:'Mil veces. En mil vidas.', karma:1 },{ texto:'No lo sé. Ya no sé nada.', karma:-1 }]},
+    { id:'2-6', nombre:'La Esposa Muerta', camina:'Me enterraste. Y luego seguiste caminando. Sin mí. Como si nada.', quieto:'Me enterraste. Y luego te sentaste a mi lado. Y te quedaste. Y sigues aquí. Conmigo. Aunque ya no estoy.', pregunta:'¿Alguna vez me olvidaste?', opciones:[{ texto:'Nunca. Eres mi único recuerdo.', karma:1 },{ texto:'Sí. La vida sigue.', karma:-1 }]}
   ],
   3: [
-    { id:'3-1', nombre:'Tu Padre',
-      camina:'Veo que sigues andando. Como siempre. Nunca supiste quedarte quieto, ni de niño.',
-      quieto:'Por fin. Cuántos años esperé verte quieto. Siempre corrías. Siempre huías. Y yo nunca supe de qué.',
-      pregunta:'¿Alguna vez te detuviste a pensar en quienes dejabas atrás?',
-      opciones:[
-        { texto:'Sí. Pero no supe cómo volver.', karma:1 },
-        { texto:'No. Tenía que seguir.', karma:-1 }
-      ]},
-    { id:'3-2', nombre:'Tu Madre',
-      camina:'Hijo. Siempre fuiste un torbellino. Me dolía el pecho cada vez que te ibas.',
-      quieto:'Qué quieto estás ahora. Cuánto tiempo deseé esto. Verte quieto. Verte mío. Aunque sea en la niebla.',
-      pregunta:'¿Alguna vez pensaste en mí cuando estabas lejos?',
-      opciones:[
-        { texto:'Todos los días. Eras mi brújula.', karma:1 },
-        { texto:'No. La distancia me hacía olvidar.', karma:-1 }
-      ]},
-    { id:'3-3', nombre:'Tu Amigo de la Infancia',
-      camina:'¿Te acuerdas de cuando corríamos por el campo? Nunca dejaste de correr. Ni cuando ya no había campo.',
-      quieto:'Mira dónde terminamos. Tú quieto, yo quieto. Como cuando éramos niños. Solo que ahora no hay granero.',
-      pregunta:'¿Alguna vez extrañaste nuestra infancia?',
-      opciones:[
-        { texto:'Cada día. Fue lo mejor que tuve.', karma:1 },
-        { texto:'La dejé atrás. No se puede vivir en el pasado.', karma:-1 }
-      ]},
-    { id:'3-4', nombre:'Tu Profesor',
-      camina:'Veo que sigues buscando. Como cuando te enseñaba. Nunca te conformabas. Eso me gustaba de ti.',
-      quieto:'Detente. Por fin. ¿Cuánto aprendiste en tu vida? ¿Cuánto olvidaste? ¿Cuánto decidiste no saber?',
-      pregunta:'¿Aprendiste algo de lo que te enseñé?',
-      opciones:[
-        { texto:'Aprendí a dudar de mí mismo. Gracias.', karma:1 },
-        { texto:'Aprendí a superarte. Ya no te necesito.', karma:-1 }
-      ]},
-    { id:'3-5', nombre:'El Sacerdote del Pueblo',
-      camina:'Sigues andando, hijo. ¿Buscas a Dios en el camino? ¿O huyes de Él?',
-      quieto:'Qué quieto estás. Como en misa, cuando eras niño. Te aburrías, pero te quedabas. Por respeto. O por miedo.',
-      pregunta:'¿Alguna vez rezaste con el corazón?',
-      opciones:[
-        { texto:'Sí. Cuando tenía miedo, rezaba por otros.', karma:1 },
-        { texto:'No. Nunca creí en nada.', karma:-1 }
-      ]},
-    { id:'3-6', nombre:'Un Desconocido',
-      camina:'No me conoces. Pero yo te conozco. Te he visto pasar toda tu vida. Siempre corriendo.',
-      quieto:'No me conoces. Pero yo te conozco. Te he visto detenerte por fin. Y mirarte por dentro.',
-      pregunta:'¿Quién eres cuando nadie te mira?',
-      opciones:[
-        { texto:'Alguien que intenta ser mejor.', karma:1 },
-        { texto:'Alguien a quien no le importa nada.', karma:-1 }
-      ]}
+    { id:'3-1', nombre:'Tu Padre', camina:'Veo que sigues andando. Como siempre. Nunca supiste quedarte quieto, ni de niño.', quieto:'Por fin. Cuántos años esperé verte quieto. Siempre corrías. Siempre huías. Y yo nunca supe de qué.', pregunta:'¿Alguna vez te detuviste a pensar en quienes dejabas atrás?', opciones:[{ texto:'Sí. Pero no supe cómo volver.', karma:1 },{ texto:'No. Tenía que seguir.', karma:-1 }]},
+    { id:'3-2', nombre:'Tu Madre', camina:'Hijo. Siempre fuiste un torbellino. Me dolía el pecho cada vez que te ibas.', quieto:'Qué quieto estás ahora. Cuánto tiempo deseé esto. Verte quieto. Verte mío. Aunque sea en la niebla.', pregunta:'¿Alguna vez pensaste en mí cuando estabas lejos?', opciones:[{ texto:'Todos los días. Eras mi brújula.', karma:1 },{ texto:'No. La distancia me hacía olvidar.', karma:-1 }]},
+    { id:'3-3', nombre:'Tu Amigo de la Infancia', camina:'¿Te acuerdas de cuando corríamos por el campo? Nunca dejaste de correr. Ni cuando ya no había campo.', quieto:'Mira dónde terminamos. Tú quieto, yo quieto. Como cuando éramos niños. Solo que ahora no hay granero.', pregunta:'¿Alguna vez extrañaste nuestra infancia?', opciones:[{ texto:'Cada día. Fue lo mejor que tuve.', karma:1 },{ texto:'La dejé atrás. No se puede vivir en el pasado.', karma:-1 }]},
+    { id:'3-4', nombre:'Tu Profesor', camina:'Veo que sigues buscando. Como cuando te enseñaba. Nunca te conformabas. Eso me gustaba de ti.', quieto:'Detente. Por fin. ¿Cuánto aprendiste en tu vida? ¿Cuánto olvidaste? ¿Cuánto decidiste no saber?', pregunta:'¿Aprendiste algo de lo que te enseñé?', opciones:[{ texto:'Aprendí a dudar de mí mismo. Gracias.', karma:1 },{ texto:'Aprendí a superarte. Ya no te necesito.', karma:-1 }]},
+    { id:'3-5', nombre:'El Sacerdote del Pueblo', camina:'Sigues andando, hijo. ¿Buscas a Dios en el camino? ¿O huyes de Él?', quieto:'Qué quieto estás. Como en misa, cuando eras niño. Te aburrías, pero te quedabas. Por respeto. O por miedo.', pregunta:'¿Alguna vez rezaste con el corazón?', opciones:[{ texto:'Sí. Cuando tenía miedo, rezaba por otros.', karma:1 },{ texto:'No. Nunca creí en nada.', karma:-1 }]},
+    { id:'3-6', nombre:'Un Desconocido', camina:'No me conoces. Pero yo te conozco. Te he visto pasar toda tu vida. Siempre corriendo.', quieto:'No me conoces. Pero yo te conozco. Te he visto detenerte por fin. Y mirarte por dentro.', pregunta:'¿Quién eres cuando nadie te mira?', opciones:[{ texto:'Alguien que intenta ser mejor.', karma:1 },{ texto:'Alguien a quien no le importa nada.', karma:-1 }]}
   ],
   4: [
-    { id:'4-1', nombre:'Tu Esposa',
-      camina:'Te veo llegar de lejos. Siempre te vi llegar de lejos, incluso cuando estabas cerca.',
-      quieto:'Qué raro verte quieto. Toda la vida te esperé quieto. Y ahora que lo estás, ya no sé qué decirte.',
-      pregunta:'¿Sabes cuántas noches me dormí esperándote?',
-      opciones:[
-        { texto:'Lo siento. Debí haber estado.', karma:1 },
-        { texto:'Alguien tenía que traer el pan.', karma:-1 }
-      ]},
-    { id:'4-2', nombre:'Tus Padres Ancianos',
-      camina:'Nos dejaste. No te culpamos. Los jóvenes tienen que volar. Pero cada invierno contábamos los días.',
-      quieto:'Te quedaste. Nos cuidaste. No como un hijo, sino como un guardián. No sabes cuánto lo agradecimos.',
-      pregunta:'¿Pensaste en nosotros cuando no estabas?',
-      opciones:[
-        { texto:'Cada invierno. Cada carta que no envié.', karma:1 },
-        { texto:'No. La distancia era mi libertad.', karma:-1 }
-      ]},
-    { id:'4-3', nombre:'Tus Hijos de Niño',
-      camina:'Nos dejaste pequeños. No te juzgamos. Aprendimos a ser fuertes. Pero aprendimos solos.',
-      quieto:'Nos criaste tú mismo. Nos enseñaste a caminar, a leer, a no tener miedo. Pero tú nunca caminaste.',
-      pregunta:'¿Nos recordaste mientras crecíamos?',
-      opciones:[
-        { texto:'Los llevé en mi pecho cada día.', karma:1 },
-        { texto:'Trabajaba por ustedes. Eso bastaba.', karma:-1 }
-      ]},
-    { id:'4-4', nombre:'Una Novia de Otro Pueblo',
-      camina:'Te conocí una vez. Una sola vez. Me prometiste volver. Nunca volviste.',
-      quieto:'Nunca me conociste. Pero yo te vi pasar una vez, de lejos. Y pensé: "Ese hombre tiene raíces profundas".',
-      pregunta:'¿Por qué no volviste?',
-      opciones:[
-        { texto:'Porque no merecía volver. Perdóname.', karma:1 },
-        { texto:'Porque encontré algo mejor.', karma:-1 }
-      ]},
-    { id:'4-5', nombre:'Tu Compañero de Fatigas',
-      camina:'Caminamos juntos mucho tiempo. Hasta que elegiste otro camino. No te culpo. Pero te extrañé.',
-      quieto:'Nunca me fui. Tú tampoco. Trabajamos juntos toda la vida. No sé si fue amistad o costumbre.',
-      pregunta:'¿Alguna vez pensaste en volver por mí?',
-      opciones:[
-        { texto:'Todos los días. Pero el orgullo me pudo.', karma:1 },
-        { texto:'No. Cada quien su camino.', karma:-1 }
-      ]},
-    { id:'4-6', nombre:'Tu Rival',
-      camina:'Me superaste. En todo. En riqueza, en familia, en nombre. Y ahora estás aquí, igual que yo.',
-      quieto:'Nos odiamos toda la vida. Tú aquí, yo allá. Nunca nos enfrentamos. Y ahora, sin nada que ganar, no sé por qué te odiaba.',
-      pregunta:'¿Alguna vez pensaste en mí con respeto?',
-      opciones:[
-        { texto:'Siempre. Fuiste mi espejo.', karma:1 },
-        { texto:'No. Solo pensaba en ganarte.', karma:-1 }
-      ]}
+    { id:'4-1', nombre:'Tu Esposa', camina:'Te veo llegar de lejos. Siempre te vi llegar de lejos, incluso cuando estabas cerca.', quieto:'Qué raro verte quieto. Toda la vida te esperé quieto. Y ahora que lo estás, ya no sé qué decirte.', pregunta:'¿Sabes cuántas noches me dormí esperándote?', opciones:[{ texto:'Lo siento. Debí haber estado.', karma:1 },{ texto:'Alguien tenía que traer el pan.', karma:-1 }]},
+    { id:'4-2', nombre:'Tus Padres Ancianos', camina:'Nos dejaste. No te culpamos. Los jóvenes tienen que volar. Pero cada invierno contábamos los días.', quieto:'Te quedaste. Nos cuidaste. No como un hijo, sino como un guardián. No sabes cuánto lo agradecimos.', pregunta:'¿Pensaste en nosotros cuando no estabas?', opciones:[{ texto:'Cada invierno. Cada carta que no envié.', karma:1 },{ texto:'No. La distancia era mi libertad.', karma:-1 }]},
+    { id:'4-3', nombre:'Tus Hijos de Niño', camina:'Nos dejaste pequeños. No te juzgamos. Aprendimos a ser fuertes. Pero aprendimos solos.', quieto:'Nos criaste tú mismo. Nos enseñaste a caminar, a leer, a no tener miedo. Pero tú nunca caminaste.', pregunta:'¿Nos recordaste mientras crecíamos?', opciones:[{ texto:'Los llevé en mi pecho cada día.', karma:1 },{ texto:'Trabajaba por ustedes. Eso bastaba.', karma:-1 }]},
+    { id:'4-4', nombre:'Una Novia de Otro Pueblo', camina:'Te conocí una vez. Una sola vez. Me prometiste volver. Nunca volviste.', quieto:'Nunca me conociste. Pero yo te vi pasar una vez, de lejos. Y pensé: "Ese hombre tiene raíces profundas".', pregunta:'¿Por qué no volviste?', opciones:[{ texto:'Porque no merecía volver. Perdóname.', karma:1 },{ texto:'Porque encontré algo mejor.', karma:-1 }]},
+    { id:'4-5', nombre:'Tu Compañero de Fatigas', camina:'Caminamos juntos mucho tiempo. Hasta que elegiste otro camino. No te culpo. Pero te extrañé.', quieto:'Nunca me fui. Tú tampoco. Trabajamos juntos toda la vida. No sé si fue amistad o costumbre.', pregunta:'¿Alguna vez pensaste en volver por mí?', opciones:[{ texto:'Todos los días. Pero el orgullo me pudo.', karma:1 },{ texto:'No. Cada quien su camino.', karma:-1 }]},
+    { id:'4-6', nombre:'Tu Rival', camina:'Me superaste. En todo. En riqueza, en familia, en nombre. Y ahora estás aquí, igual que yo.', quieto:'Nos odiamos toda la vida. Tú aquí, yo allá. Nunca nos enfrentamos. Y ahora, sin nada que ganar, no sé por qué te odiaba.', pregunta:'¿Alguna vez pensaste en mí con respeto?', opciones:[{ texto:'Siempre. Fuiste mi espejo.', karma:1 },{ texto:'No. Solo pensaba en ganarte.', karma:-1 }]}
   ],
   5: [
-    { id:'5-1', nombre:'Tu Hijo/a que Dejaste de Ver',
-      camina:'Te vi irte. De pequeño, te vi irte. Y luego yo me fui. Y nunca volví. Y tú nunca volviste.',
-      quieto:'Me dejaste. Sin despedirte. Sin mirar atrás. Y yo me quedé esperando. Toda la vida.',
-      pregunta:'¿Alguna vez pensaste en mí?',
-      opciones:[
-        { texto:'Todos los días. Pero no supe volver.', karma:1 },
-        { texto:'No. La vida me llevó.', karma:-1 }
-      ]},
-    { id:'5-2', nombre:'Tu Nieto/a que Nunca Conociste',
-      camina:'Nunca me conociste. Y yo nunca te conocí. Pero sé tu nombre. Lo repetía tu padre en sus cartas.',
-      quieto:'Nunca me conociste. Pero yo te vi una vez. En una foto. Y supe que existías.',
-      pregunta:'¿Te hubiera gustado conocerme?',
-      opciones:[
-        { texto:'Sí. Habrías sido mi tesoro.', karma:1 },
-        { texto:'No. No me perdí nada.', karma:-1 }
-      ]},
-    { id:'5-3', nombre:'La Mujer que Amaste y no Elegiste',
-      camina:'Me dejaste por otra. Y luego por otra. Y luego por nadie. Y ahora estás aquí. Solo.',
-      quieto:'Me dejaste por lo que ya tenías. Y nunca volviste. Pero yo te esperé. Toda la vida.',
-      pregunta:'¿Alguna vez te arrepentiste?',
-      opciones:[
-        { texto:'Todos los días. Pero no supe volver.', karma:1 },
-        { texto:'No. Elegí bien.', karma:-1 }
-      ]},
-    { id:'5-4', nombre:'El Amigo que Hiciste en el Camino',
-      camina:'Caminamos juntos un tramo. Luego te fuiste. Como todos. Pero nunca te olvidé.',
-      quieto:'Nunca caminamos juntos. Tú ibas y venías. Yo esperaba. Y cada vez que volvías, era como si nunca te hubieras ido.',
-      pregunta:'¿Alguna vez me consideraste tu amigo?',
-      opciones:[
-        { texto:'Siempre. Fuiste mi hermano.', karma:1 },
-        { texto:'Eras solo un conocido.', karma:-1 }
-      ]},
-    { id:'5-5', nombre:'El Enemigo que se Volvió Hermano',
-      camina:'Nos odiamos. Nos golpeamos. Nos traicionamos. Y al final, nos salvamos.',
-      quieto:'Nunca te odié. Nunca me odiaste. Solo nos ignoramos. Toda la vida. Y eso fue peor que el odio.',
-      pregunta:'¿Alguna vez me perdonaste?',
-      opciones:[
-        { texto:'Sí. Y me perdoné a mí mismo.', karma:1 },
-        { texto:'No. Me llevé el rencor a la tumba.', karma:-1 }
-      ]},
-    { id:'5-6', nombre:'El Desconocido que te Cuidó al Final',
-      camina:'No me conoces. Pero te cuidé. Porque no tenías a nadie. Y yo tampoco.',
-      quieto:'No me conoces. Pero te vi morir. Solo. Viejo. Y no hice nada.',
-      pregunta:'¿Alguna vez agradeciste a alguien sin motivo?',
-      opciones:[
-        { texto:'Sí. A ti. Ahora.', karma:1 },
-        { texto:'No. Nunca me hizo falta.', karma:-1 }
-      ]}
+    { id:'5-1', nombre:'Tu Hijo/a que Dejaste de Ver', camina:'Te vi irte. De pequeño, te vi irte. Y luego yo me fui. Y nunca volví. Y tú nunca volviste.', quieto:'Me dejaste. Sin despedirte. Sin mirar atrás. Y yo me quedé esperando. Toda la vida.', pregunta:'¿Alguna vez pensaste en mí?', opciones:[{ texto:'Todos los días. Pero no supe volver.', karma:1 },{ texto:'No. La vida me llevó.', karma:-1 }]},
+    { id:'5-2', nombre:'Tu Nieto/a que Nunca Conociste', camina:'Nunca me conociste. Y yo nunca te conocí. Pero sé tu nombre. Lo repetía tu padre en sus cartas.', quieto:'Nunca me conociste. Pero yo te vi una vez. En una foto. Y supe que existías.', pregunta:'¿Te hubiera gustado conocerme?', opciones:[{ texto:'Sí. Habrías sido mi tesoro.', karma:1 },{ texto:'No. No me perdí nada.', karma:-1 }]},
+    { id:'5-3', nombre:'La Mujer que Amaste y no Elegiste', camina:'Me dejaste por otra. Y luego por otra. Y luego por nadie. Y ahora estás aquí. Solo.', quieto:'Me dejaste por lo que ya tenías. Y nunca volviste. Pero yo te esperé. Toda la vida.', pregunta:'¿Alguna vez te arrepentiste?', opciones:[{ texto:'Todos los días. Pero no supe volver.', karma:1 },{ texto:'No. Elegí bien.', karma:-1 }]},
+    { id:'5-4', nombre:'El Amigo que Hiciste en el Camino', camina:'Caminamos juntos un tramo. Luego te fuiste. Como todos. Pero nunca te olvidé.', quieto:'Nunca caminamos juntos. Tú ibas y venías. Yo esperaba. Y cada vez que volvías, era como si nunca te hubieras ido.', pregunta:'¿Alguna vez me consideraste tu amigo?', opciones:[{ texto:'Siempre. Fuiste mi hermano.', karma:1 },{ texto:'Eras solo un conocido.', karma:-1 }]},
+    { id:'5-5', nombre:'El Enemigo que se Volvió Hermano', camina:'Nos odiamos. Nos golpeamos. Nos traicionamos. Y al final, nos salvamos.', quieto:'Nunca te odié. Nunca me odiaste. Solo nos ignoramos. Toda la vida. Y eso fue peor que el odio.', pregunta:'¿Alguna vez me perdonaste?', opciones:[{ texto:'Sí. Y me perdoné a mí mismo.', karma:1 },{ texto:'No. Me llevé el rencor a la tumba.', karma:-1 }]},
+    { id:'5-6', nombre:'El Desconocido que te Cuidó al Final', camina:'No me conoces. Pero te cuidé. Porque no tenías a nadie. Y yo tampoco.', quieto:'No me conoces. Pero te vi morir. Solo. Viejo. Y no hice nada.', pregunta:'¿Alguna vez agradeciste a alguien sin motivo?', opciones:[{ texto:'Sí. A ti. Ahora.', karma:1 },{ texto:'No. Nunca me hizo falta.', karma:-1 }]}
   ]
 };
 
@@ -697,8 +541,7 @@ const BANDAS = {
 };
 
 /* ============================================================
-   TABLA DE DAÑO POR NIVEL DE NIEBLA
-   La niebla cambia cada 5 turnos. Nivel 1 a 10.
+   TABLA DE DAÑO POR NIVEL DE NIEBLA (cada 5 turnos sube)
    ============================================================ */
 const DANO_POR_NIVEL = { 1:0, 2:0, 3:0, 4:0, 5:0, 6:1, 7:1, 8:2, 9:2, 10:4 };
 
@@ -764,7 +607,9 @@ function estadoInicial() {
     habilidadUsada: false,
     fase: 'origen',
     esperandoRespuesta: false,
-    proximaTirada: null
+    proximaTirada: null,
+    frasesNadaUsadas: [],
+    frasesAtmosUsadas: []
   };
 }
 
@@ -796,26 +641,67 @@ function getNieblaNivel(turno) {
   return Math.min(10, Math.floor(turno / 5) + 1);
 }
 
+function sacarFraseNada() {
+  if (S.frasesNadaUsadas.length >= FRASES_NADA.length) S.frasesNadaUsadas = [];
+  const disponibles = FRASES_NADA.map((_, i) => i).filter(i => !S.frasesNadaUsadas.includes(i));
+  const idx = disponibles[Math.floor(Math.random() * disponibles.length)];
+  S.frasesNadaUsadas.push(idx);
+  return FRASES_NADA[idx];
+}
+
+function sacarFraseAtmos() {
+  if (S.frasesAtmosUsadas.length >= FRASES_ATMOS.length) S.frasesAtmosUsadas = [];
+  const disponibles = FRASES_ATMOS.map((_, i) => i).filter(i => !S.frasesAtmosUsadas.includes(i));
+  const idx = disponibles[Math.floor(Math.random() * disponibles.length)];
+  S.frasesAtmosUsadas.push(idx);
+  return FRASES_ATMOS[idx];
+}
+
 function actualizarFondo() {
   const nivel = S.nieblaNivel;
   const img = $('fogBg');
-  const nuevaUrl = `Niebla/F${nivel}.png`;
-  // Solo cambiar si es distinto para no parpadear
   if (!img.dataset.current || img.dataset.current !== String(nivel)) {
     img.classList.add('fade');
     setTimeout(() => {
-      img.style.backgroundImage = `url('${nuevaUrl}')`;
+      img.style.backgroundImage = `url('Niebla/F${nivel}.png')`;
       img.dataset.current = String(nivel);
       img.classList.remove('fade');
     }, 300);
   }
 }
 
+function actualizarKarma() {
+  const panel = $('karmaPanel');
+  panel.innerHTML = '';
+  const k = S.karma;
+  const abs = Math.min(5, Math.abs(k));
+  const tipo = k > 0 ? 'yellow' : k < 0 ? 'black' : 'empty';
+  for (let i = 0; i < 5; i++) {
+    const star = document.createElement('span');
+    star.className = 'karma-star ' + (i < abs ? tipo : 'empty');
+    star.textContent = '★';
+    panel.appendChild(star);
+  }
+}
+
+function actualizarDanger() {
+  const ratio = S.presencia / S.maxPresencia;
+  const vig = $('dangerVignette');
+  const cont = $('container');
+  vig.classList.remove('warn', 'critical');
+  cont.classList.remove('danger');
+  if (ratio <= 0.15) {
+    vig.classList.add('critical');
+    cont.classList.add('danger');
+  } else if (ratio <= 0.35) {
+    vig.classList.add('warn');
+    cont.classList.add('danger');
+  }
+}
+
 function actualizarUI() {
-  $('valPres').textContent = `${S.presencia}/${S.maxPresencia}`;
-  $('valKar').textContent = (S.karma >= 0 ? '+' : '') + S.karma;
-  $('valKar').className = 'val kar' + (S.karma >= 5 ? ' pos' : S.karma <= -5 ? ' neg' : '');
-  $('statKar').className = 'stat' + (S.karma >= 5 ? ' salvacion' : S.karma <= -5 ? ' condena' : '');
+  actualizarKarma();
+  actualizarDanger();
 
   const banda = getBanda(S.deriva);
   $('derivaVal').textContent = S.deriva;
@@ -833,11 +719,10 @@ function actualizarUI() {
   $('btnWalk').disabled = !activo;
   $('btnStay').disabled = !activo;
 
-  // Habilidad origen
   const btn = $('btnHabilidad');
   if (S.fase === 'juego' && !S.habilidadUsada && S.origin !== 'soldado') {
     btn.style.display = 'inline-block';
-    btn.textContent = S.origin === 'enano' ? '⚒️ Reparar cuerpo (+6 Presencia)' : '🧝 Escuchar la Niebla (-3 Presencia)';
+    btn.textContent = S.origin === 'enano' ? '⚒️ Reparar cuerpo' : '🧝 Escuchar la Niebla';
   } else {
     btn.style.display = 'none';
   }
@@ -866,7 +751,7 @@ function elegirOrigen(o) {
 }
 
 /* ============================================================
-   DECISIÓN PRINCIPAL
+   DECISIÓN
    ============================================================ */
 function decidir(accion) {
   if (S.fase !== 'juego' || S.esperandoRespuesta) return;
@@ -877,20 +762,18 @@ function decidir(accion) {
   if (accion === 'caminar') {
     S.deriva++;
     S.totalCaminar++;
-    log('🚶 Caminas. La niebla se agita. No sabes si avanzas o retrocedes.', 'walk');
+    log('🚶 Caminas. La niebla se agita.', 'walk');
   } else {
     S.deriva--;
     S.totalQuedarse++;
-    log('🧍 Te quedas quieto. La niebla se espesa. El silencio pesa.', 'stay');
+    log('🧍 Te quedas quieto. La niebla se espesa.', 'stay');
   }
 
-  // Check Deriva
   if (S.deriva >= 10) { actualizarUI(); return irAlCentro(); }
   if (S.deriva <= -10) { actualizarUI(); return finalDisolucion('absorbido'); }
 
-  // Encuentro
   if (S.limboActivo) {
-    log('La niebla está vacía. No hay rostros. Solo tú.', 'niebla');
+    log('La niebla está vacía. No hay rostros. Solo tú.', 'nothing');
   } else {
     const roll = S.proximaTirada !== null ? S.proximaTirada : d6();
     if (S.proximaTirada !== null) {
@@ -900,7 +783,8 @@ function decidir(accion) {
       log(`🎲 Tirada: ${roll}`, 'sys');
     }
 
-    if (roll >= 4) {
+    if (roll <= 4) {
+      // 4/6 = 2/3 → encuentro
       const banda = getBanda(S.deriva);
       const disponibles = ENCUENTROS[banda].filter(e => !S.encuentrosVisitados.includes(e.id));
       if (disponibles.length > 0) {
@@ -912,8 +796,12 @@ function decidir(accion) {
         log('🌫️ La niebla ya no te muestra rostros. Has agotado los encuentros de esta etapa.', 'danger');
         log('CUENTA DEL LIMBO: 10 turnos.', 'danger');
       }
+    } else if (roll === 5) {
+      // 1/6 → nada (20 frases)
+      log(sacarFraseNada(), 'nothing');
     } else {
-      log('Nada. Solo niebla.', 'niebla');
+      // 1/6 → atmósfera (20 frases)
+      log(sacarFraseAtmos(), 'atmos');
     }
   }
 
@@ -927,15 +815,17 @@ function finalizarTurno() {
   const nivel = S.nieblaNivel;
   let dano = DANO_POR_NIVEL[nivel] || 0;
 
-  // Modificadores por Karma
   if (S.karma >= 5) dano = Math.max(0, dano - 1);
   if (S.karma <= -5) dano += 1;
 
-  // Maldición del Soldado: cada encuentro perdido sube niebla. Ya lo aplicamos como daño extra ocasional.
-
   if (dano > 0) {
     S.presencia -= dano;
-    log(`🌫️ La niebla te consume: -${dano} Presencia.`, 'danger');
+    // No mostramos número, solo una advertencia vaga
+    if (S.presencia <= 5) {
+      log('Sientes que algo dentro de ti se apaga.', 'danger');
+    } else {
+      log('La niebla te consume lentamente.', 'danger');
+    }
   }
 
   if (S.presencia <= 0) { actualizarUI(); return finalDisolucion('apagado'); }
@@ -989,14 +879,13 @@ function responder(enc, opcion) {
   S.karma += opcion.karma;
 
   if (opcion.karma > 0) {
-    log(`✨ Karma +1. (Total: ${S.karma >= 0 ? '+' : ''}${S.karma})`, 'kar-pos');
+    log(`✨ Una estrella se enciende.`, 'kar-pos');
   } else {
-    log(`🌑 Karma −1. (Total: ${S.karma})`, 'kar-neg');
-    // Soldado: la niebla se espesa más rápido
+    log(`🌑 Una estrella se apaga.`, 'kar-neg');
     if (S.origin === 'soldado') {
       S.turno += 1;
       S.nieblaNivel = getNieblaNivel(S.turno);
-      log(`⚔️ La guerra te persigue: la niebla se espesa.`, 'danger');
+      log(`⚔️ La guerra te persigue.`, 'danger');
     }
   }
 
@@ -1005,27 +894,27 @@ function responder(enc, opcion) {
 }
 
 /* ============================================================
-   HABILIDAD DE ORIGEN
+   HABILIDAD
    ============================================================ */
 function usarHabilidad() {
   if (S.habilidadUsada || S.fase !== 'juego') return;
   if (S.origin === 'enano') {
     S.presencia = Math.min(S.maxPresencia, S.presencia + 6);
     S.habilidadUsada = true;
-    log('⚒️ Reparas tu cuerpo con viejas memorias de hierro. +6 Presencia.', 'good');
+    log('⚒️ Reparas tu cuerpo con viejas memorias de hierro.', 'good');
   } else if (S.origin === 'elfo') {
     if (S.presencia <= 3) return;
     S.presencia -= 3;
     S.proximaTirada = d6();
     S.habilidadUsada = true;
-    log('🧝 Escuchas la Niebla. Pagas con un poco de ti. (-3 Presencia)', 'good');
+    log('🧝 Escuchas la Niebla. Pagas con un poco de ti.', 'good');
     log(`   La próxima tirada será: ${S.proximaTirada}`, 'sys');
   }
   actualizarUI();
 }
 
 /* ============================================================
-   CENTRO Y FINALES
+   FINALES
    ============================================================ */
 function irAlCentro() {
   S.fase = 'centro';
@@ -1045,11 +934,6 @@ function mostrarFinal() {
   const final = FINALES[clave];
 
   let bandaDom = 3, maxVisitas = 0;
-  for (let b = 1; b <= 5; b++) {
-    if (S.bandasVisitadas[b] > maxVisitas) { maxVisitas = S.bandasVisitas; bandaDom = b; }
-  }
-  // Corregir bug de arriba
-  bandaDom = 3; maxVisitas = 0;
   for (let b = 1; b <= 5; b++) {
     if (S.bandasVisitadas[b] > maxVisitas) { maxVisitas = S.bandasVisitadas[b]; bandaDom = b; }
   }
@@ -1100,9 +984,6 @@ function finalLimbo() {
   actualizarUI();
 }
 
-/* ============================================================
-   REINICIO
-   ============================================================ */
 function reiniciar() {
   S = estadoInicial();
   $('overlayOrigen').classList.add('active');
